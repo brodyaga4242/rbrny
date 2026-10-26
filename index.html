@@ -4341,7 +4341,7 @@ function ghLogout(){
   location.href = location.pathname;
 }
 /* Запертый токен: строка из seal.html (salt|iv|шифр, base64). Пароль открывает её только в браузере; пусто — вход по токену вручную. */
-const GH_SEALED = "SpwPf7a/UOExNfy60hKa/GFeBkssUlxvjxgOVF0AAC6arJZoP863dgy3X3CdDvUFJEsV1QIAh6005mz0N0aGINywDKmScqrBZjbgYcaGcJDgkCsyFSgnY292shQKUyNgvLIW3l81VVjy1eFpr9C+IZW3FsGC6IUYDXPOcO2MMk/FRHc1NokiV/Q=";
+const GH_SEALED = "npVB5KHp1UbRFuWwQxp03VWtpNreWW1Jji3QG67QI97EUd5P0OMs5BAf1mvOT/0V0SD91fL38OdrwwRuB2nUp7/+FWxD4Vnz7aESAYVYypoQp2Ryx5vy7ZLM1qYfczJoL3aQzLuR7f+BIyqJePuTHwiG87lEpfJ4j4S8iO67d1caHljc4xBpefVC9gKzrwpM7PwV3OopHg/H+ZOdbfuPl84ORlxogQeErXugxDY2+YJbpYEhFg0cfjji5qnS3VfbYg==";
 const b64u = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
 async function ghUnseal(pass){
   const raw = b64u(GH_SEALED), salt = raw.slice(0, 16), iv = raw.slice(16, 28);
