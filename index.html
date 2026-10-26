@@ -4340,8 +4340,50 @@ function ghLogout(){
   try{ localStorage.removeItem(GHKEY); localStorage.removeItem(CACHE); }catch(e){}
   location.href = location.pathname;
 }
+/* Запертый токен: строка из seal.html (salt|iv|шифр, base64). Пароль открывает её только в браузере; пусто — вход по токену вручную. */
+const GH_SEALED = "SpwPf7a/UOExNfy60hKa/GFeBkssUlxvjxgOVF0AAC6arJZoP863dgy3X3CdDvUFJEsV1QIAh6005mz0N0aGINywDKmScqrBZjbgYcaGcJDgkCsyFSgnY292shQKUyNgvLIW3l81VVjy1eFpr9C+IZW3FsGC6IUYDXPOcO2MMk/FRHc1NokiV/Q=";
+const b64u = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+async function ghUnseal(pass){
+  const raw = b64u(GH_SEALED), salt = raw.slice(0, 16), iv = raw.slice(16, 28);
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({name: "PBKDF2", salt, iterations: 600000, hash: "SHA-256"}, km, {name: "AES-GCM", length: 256}, false, ["decrypt"]);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name: "AES-GCM", iv}, key, raw.slice(28))));
+}
+function ghLoginPass(){
+  const pass = h("input", {type: "password", placeholder: "Пароль", autocomplete: "current-password", spellcheck: "false"});
+  const msg = h("p", {class: "gh-msg"});
+  const ok = h("button", {class: "imgbtn", type: "button"}, "Войти");
+  const no = h("button", {class: "imgbtn soft", type: "button"}, "Закрыть");
+  const box = h("div", {class: "gh-box", role: "dialog", "aria-label": "Вход для админов"},
+    h("div", {class: "gh-in"}, h("h3", {}, "Вход для админов"), h("label", {}, "Пароль", pass), msg, h("div", {class: "gh-row"}, ok, no)));
+  const close = () => box.remove();
+  no.onclick = close;
+  box.addEventListener("click", e => { if (e.target === box) close(); });
+  const go = async () => {
+    if (!pass.value) return;
+    msg.textContent = "Проверяю…"; ok.disabled = true;
+    try{
+      let cfg;
+      try{ cfg = await ghUnseal(pass.value); }catch(e){ throw {status: "pass"}; }
+      ghCfg = cfg;
+      const r = await fetch("https://api.github.com/repos/" + cfg.repo, {headers: ghHeaders({"Accept": "application/vnd.github+json"})});
+      if (!r.ok) throw {status: r.status};
+      localStorage.setItem(GHKEY, JSON.stringify(cfg));
+      let d = null; try{ d = await ghRead(); }catch(e){}
+      if (d && !keepLocal){ C = normalize(d); cache(); }
+      close(); ghStart(); renderAll(); toast("Вы вошли. Нажмите «Редактировать» внизу справа.");
+    }catch(e){
+      ghCfg = null; ok.disabled = false;
+      msg.textContent = e && e.status === "pass" ? "Пароль не подошёл." : "Не получилось войти. Проверьте интернет и попробуйте ещё раз.";
+    }
+  };
+  ok.onclick = go;
+  pass.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  document.body.append(box); pass.focus();
+}
 function ghLogin(){
   if ($(".gh-box")) return;
+  if (GH_SEALED) return ghLoginPass();
   const repo = h("input", {type: "text", value: (ghCfg && ghCfg.repo) || ghGuess(), placeholder: "логин/репозиторий", autocomplete: "off", spellcheck: "false"});
   const branch = h("input", {type: "text", value: (ghCfg && ghCfg.branch) || "main", autocomplete: "off", spellcheck: "false"});
   const token = h("input", {type: "password", placeholder: "github_pat_…", autocomplete: "off", spellcheck: "false"});
