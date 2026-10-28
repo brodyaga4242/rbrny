@@ -177,6 +177,10 @@ details[open] .pm::after{transform:rotate(0)}
 details p{max-width:68ch;margin:0;padding:0 20px 20px;color:var(--muted)}
 
 /* stats */
+.kindsw{display:inline-flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.kindsw button{appearance:none;border:0;background:transparent;color:var(--muted);font:600 14px/1 var(--mono);padding:12px 18px;min-height:44px;cursor:pointer}
+.kindsw button[aria-pressed="true"]{background:var(--gold);color:var(--on-gold)}
+.kindsw button:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
 .stats{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
 @media (max-width:880px){.stats{grid-template-columns:1fr}}
 .sheet{padding:22px 22px 14px;background:var(--panel)}
@@ -1398,7 +1402,7 @@ function normalize(d){
   if (Array.isArray(d.groups)) o.groups = d.groups.filter(g => g && typeof g === "object").map((g, i) => ({id: str(g.id) || ("g" + i + Math.random().toString(36).slice(2, 6)), name: str(g.name), note: str(g.note), color: safeColor(g.color || TEAM_COLORS[i % TEAM_COLORS.length])}));
   if (Array.isArray(d.teams)) o.teams = d.teams.filter(t => t && typeof t === "object").map((t, i) => ({
     id: str(t.id), group: str(t.group), direct: !!t.direct, name: str(t.name), tag: str(t.tag), img: str(t.img), color: safeColor(t.color || TEAM_COLORS[i % TEAM_COLORS.length]), about: str(t.about),
-    chars: Array.isArray(t.chars) ? t.chars.filter(c => c && typeof c === "object").map(c => ({id: str(c.id), name: str(c.name), alias: str(c.alias), age: str(c.age), power: str(c.power), desc: str(c.desc), player: str(c.player), story: str(c.story), story2: str(c.story2), img: str(c.img), img2: str(c.img2), pic1: str(c.pic1), pic2: str(c.pic2), pic3: str(c.pic3), stats: Array.isArray(c.stats) ? c.stats.slice(0, 8).map(v => v | 0) : []})) : []
+    chars: Array.isArray(t.chars) ? t.chars.filter(c => c && typeof c === "object").map(c => ({id: str(c.id), name: str(c.name), alias: str(c.alias), age: str(c.age), power: str(c.power), desc: str(c.desc), player: str(c.player), story: str(c.story), story2: str(c.story2), img: str(c.img), img2: str(c.img2), pic1: str(c.pic1), pic2: str(c.pic2), pic3: str(c.pic3), kind: c.kind === "human" ? "human" : "", stats: Array.isArray(c.stats) ? c.stats.slice(0, 8).map(v => v | 0) : []})) : []
   }));
   if (Array.isArray(d.teams)) o.teams.forEach(t => { if (t.group && !o.groups.some(g => g.id === t.group)) t.group = ""; if (t.direct && !t.group) t.direct = false; });
   if (Array.isArray(d.players)) o.players = d.players.filter(Boolean).map(p => ({nick: str(p.nick), chars: str(p.chars), since: str(p.since)}));
@@ -2062,11 +2066,15 @@ function radarSvg(names, vals, MAX){
   });
   return svg;
 }
+function kindSwitch(cur, onPick){
+  return h("div", {class: "kindsw", role: "group", "aria-label": "Кто это"}, KINDS.map(([k, label]) =>
+    h("button", {type: "button", "aria-pressed": String(cur === k), onclick: () => { if (cur !== k) onPick(k); }}, label)));
+}
 function charStats(c, t){
   /* особые правила смотрят и на имя, и на прозвище героя */
-  const key = [c.name, c.alias].find(n => n && (isBoost(n) || lockedFor(n))) || c.name;
-  const S = C.stats, names = S.names, N = names.length, MIN = S.min, MAX = S.max, CAP = capFor(key), POINTS = pointsFor(key);
-  const locked = lockedFor(key);
+  const key = [c.name, c.alias].find(n => n && (isBoost(n) || lockedOf(n))) || c.name;
+  const S = C.stats, names = S.names, N = names.length, MIN = S.min, MAX = S.max, CAP = capFor(key, c.kind), POINTS = pointsFor(key, c.kind);
+  const locked = lockedFor(key, c.kind);
   const has = !!locked || (Array.isArray(c.stats) && c.stats.length === N && c.stats.every(v => v >= MIN && v <= CAP) && c.stats.reduce((a, b) => a + b, 0) <= POINTS);
   if (!has && !editing) return null;
   const vals = locked ? locked.slice() : has ? c.stats : names.map(() => MIN);
@@ -2085,6 +2093,8 @@ function charStats(c, t){
     h("div", {class: "radar"}, radarSvg(names, vals, MAX)),
     h("div", {class: "cs-side"},
       h("p", {class: "kicker"}, "Способности"),
+      editing ? kindSwitch(c.kind === "human" ? "human" : "super", k => change(() => { c.kind = k === "human" ? "human" : ""; c.stats = []; })) : null,
+      (c.kind === "human") ? h("p", {class: "cs-hint"}, "Обычный человек, без суперсил. Очков: " + POINTS + ".") : null,
       list,
       (editing && locked) ? h("p", {class: "cs-hint"}, "Значения этого героя закреплены и не меняются.") : null,
       (editing && !locked) ? h("div", {class: "cs-ed"},
@@ -2904,7 +2914,7 @@ function viewFaq(){
 
 /* ---------- Характеристики ---------- */
 const STORE = "rebornY.editor.sheet";
-const sheet = { name: "", team: -1, vals: [], photo: "", quote: "" };
+const sheet = { name: "", kind: "super", team: -1, vals: [], photo: "", quote: "" };
 let sheetOrig = "";   // исходное фото для повторной обрезки (только в памяти)
 (function load(){
   try{
@@ -2912,6 +2922,7 @@ let sheetOrig = "";   // исходное фото для повторной о�
     if (!s) return;
     if (Array.isArray(s.vals)) sheet.vals = s.vals.map(v => v | 0);
     sheet.name = typeof s.name === "string" ? s.name.slice(0, 40) : "";
+    sheet.kind = s.kind === "human" ? "human" : "super";
     sheet.team = Number.isInteger(s.team) ? s.team : -1;
     sheet.quote = typeof s.quote === "string" ? s.quote.slice(0, 160) : "";
     if (typeof s.photo === "string" && /^data:image\//.test(s.photo) && s.photo.length < 900000) sheet.photo = s.photo;
@@ -2924,14 +2935,20 @@ const isBoost = name => Object.prototype.hasOwnProperty.call(BOOST, boostKey(nam
 const BOOST_CAP = 10;
 /* Закреплённые паутины: по этим именам значения заданы заранее и не меняются (порядок: Сила, Ловкость, Харизма, Бесстрашие, Интеллект) */
 const LOCKED = {"марвин джейсон": [2, 2, 3, 3, 5], "тачмэн": [2, 2, 3, 3, 5]};
-const lockedFor = name => { const L = LOCKED[boostKey(name)]; return L && L.length === C.stats.names.length ? L : null; };
-const pointsFor = name => isBoost(name) ? Math.max(BOOST[boostKey(name)], C.stats.points) : C.stats.points;
-const capFor = name => isBoost(name) ? Math.max(BOOST_CAP, C.stats.max) : C.stats.max;
-const sheetPoints = () => pointsFor(sheet.name);
-const sheetCap = () => capFor(sheet.name);
+const lockedOf = name => { const L = LOCKED[boostKey(name)]; return L && L.length === C.stats.names.length ? L : null; };
+/* Обычные люди: очков меньше, чем у суперов. Число можно менять здесь (HUMAN_POINTS); потолок одной характеристики по умолчанию такой же, как у суперов */
+const HUMAN_POINTS = 10;
+const humanPoints = () => Math.max(C.stats.min * C.stats.names.length, Math.min(HUMAN_POINTS, C.stats.points));
+const KINDS = [["super", "Супер"], ["human", "Человек"]];
+const lockedFor = (name, kind) => kind === "human" ? null : lockedOf(name);
+const pointsFor = (name, kind) => kind === "human" ? humanPoints() : isBoost(name) ? Math.max(BOOST[boostKey(name)], C.stats.points) : C.stats.points;
+const capFor = (name, kind) => kind === "human" ? C.stats.max : isBoost(name) ? Math.max(BOOST_CAP, C.stats.max) : C.stats.max;
+const sheetPoints = () => pointsFor(sheet.name, sheet.kind);
+const sheetCap = () => capFor(sheet.name, sheet.kind);
+const sheetLocked = () => lockedFor(sheet.name, sheet.kind);
 function fixSheet(){
   const S = C.stats, N = S.names.length;
-  const L = lockedFor(sheet.name);
+  const L = sheetLocked();
   if (L) sheet.vals = L.slice();
   const ok = sheet.vals.length === N && sheet.vals.every(v => v >= S.min && v <= sheetCap()) && sheet.vals.reduce((a, b) => a + b, 0) <= sheetPoints();
   if (!ok) sheet.vals = S.names.map(() => S.min);
@@ -3018,7 +3035,7 @@ async function renderSheet(type){
   g.textBaseline = "alphabetic";
   g.font = "700 24px " + MONO; g.fillStyle = GOLD; g.textAlign = "left";
   g.fillText((C.site.name + " · реестр героев").toUpperCase(), LX, 112);
-  g.fillStyle = DIM; g.textAlign = "right"; g.fillText("КАРТА СПОСОБНОСТЕЙ", W - 80, 112);
+  g.fillStyle = DIM; g.textAlign = "right"; g.fillText(sheet.kind === "human" ? "КАРТА СПОСОБНОСТЕЙ · ЧЕЛОВЕК" : "КАРТА СПОСОБНОСТЕЙ", W - 80, 112);
 
   const photoImg = sheet.photo ? await loadImg(sheet.photo).catch(() => null) : null;
   const title = (sheet.name || "Безымянный герой").toUpperCase();
@@ -3179,10 +3196,10 @@ function viewStats(){
   const root = h("div", {class: "stats"});
   const nameIn = h("input", {id: "sheet-name", maxlength: "40", placeholder: "Например, Полночь", autocomplete: "off"}); nameIn.value = sheet.name;
   nameIn.addEventListener("input", () => {
-    const was = sheetPoints() + "/" + sheetCap() + "/" + !!lockedFor(sheet.name), wasLocked = !!lockedFor(sheet.name);
+    const was = sheetPoints() + "/" + sheetCap() + "/" + !!sheetLocked(), wasLocked = !!sheetLocked();
     sheet.name = nameIn.value.trim();
-    if (sheetPoints() + "/" + sheetCap() + "/" + !!lockedFor(sheet.name) !== was){
-      if (wasLocked && !lockedFor(sheet.name)) sheet.vals = C.stats.names.map(() => C.stats.min);
+    if (sheetPoints() + "/" + sheetCap() + "/" + !!sheetLocked() !== was){
+      if (wasLocked && !sheetLocked()) sheet.vals = C.stats.names.map(() => C.stats.min);
       fixSheet(); persist(); render();
       const n = document.getElementById("sheet-name");
       if (n){ n.focus(); const e = n.value.length; try{ n.setSelectionRange(e, e); }catch(_){} }
@@ -3190,6 +3207,8 @@ function viewStats(){
     }
     update();
   });
+  const kindEl = h("div", {class: "field"}, h("span", {}, "Кто это"),
+    kindSwitch(sheet.kind, k => { sheet.kind = k; sheet.vals = C.stats.names.map(() => C.stats.min); fixSheet(); persist(); render(); }));
   const teamSel = h("select", {id: "sheet-team"}, h("option", {value: "-1"}, "Без команды"), C.teams.map((t, i) => h("option", {value: String(i)}, t.name)));
   teamSel.value = String(sheet.team);
   teamSel.addEventListener("change", () => { sheet.team = +teamSel.value; update(); });
@@ -3235,14 +3254,14 @@ function viewStats(){
   const say = t => { status.textContent = t; };
 
   function setStat(i, v){
-    if (lockedFor(sheet.name)) return;
+    if (sheetLocked()) return;
     v = Math.max(MIN, Math.min(CAP, v));
     v = Math.min(v, POINTS - (used() - sheet.vals[i]));
     if (v < MIN) return;
     sheet.vals[i] = v; update();
   }
   function update(){
-    const left = POINTS - used(), team = C.teams[sheet.team], LOCK = !!lockedFor(sheet.name);
+    const left = POINTS - used(), team = C.teams[sheet.team], LOCK = !!sheetLocked();
     reset.disabled = false;
     if (LOCK) say("Значения этого героя закреплены администрацией. Нажмите «Сбросить», чтобы ввести нового героя.");
     else if (status.textContent.startsWith("Значения этого героя")) say("");
@@ -3291,13 +3310,13 @@ function viewStats(){
   function copyText(){
     const team = C.teams[sheet.team];
     const text = [(sheet.name || "Безымянный герой"), team ? "Команда: " + team.name : null,
-      ...NAMES.map((n, i) => n + ": " + sheet.vals[i] + "/" + MAX), "Очков: " + used() + "/" + POINTS].filter(Boolean).join("\n");
+      sheet.kind === "human" ? "Обычный человек" : null, ...NAMES.map((n, i) => n + ": " + sheet.vals[i] + "/" + MAX), "Очков: " + used() + "/" + POINTS].filter(Boolean).join("\n");
     const fallback = () => { const ta = h("textarea", {readonly: true, "aria-label": "Текст карты"}); ta.value = text; status.replaceChildren("Скопируйте текст вручную:", ta); ta.focus(); ta.select(); };
     try{ navigator.clipboard.writeText(text).then(() => say("Скопировано. Вставьте в анкету."), fallback); }catch(e){ fallback(); }
   }
   const reset = h("button", {class: "btn ghost", type: "button", onclick: () => {
     /* у закреплённого героя (Тачмэн, Марвин Джейсон) сброс очищает и имя: можно вводить нового */
-    if (lockedFor(sheet.name)){
+    if (sheetLocked()){
       sheet.name = ""; sheet.vals = C.stats.names.map(() => C.stats.min); fixSheet(); persist(); render();
       const n = document.getElementById("sheet-name"); if (n) n.focus();
       return;
@@ -3310,9 +3329,10 @@ function viewStats(){
   const free = POINTS - MIN * N;
   root.append(
     h("section", {class: "sheet cut", "aria-label": "Карта персонажа"},
-      h("div", {class: "sheet-head"}, h("span", {}, "Карта способностей"), sumEl), nameEl, teamEl, h("div", {class: "radar"}, svg)),
+      h("div", {class: "sheet-head"}, h("span", {}, sheet.kind === "human" ? "Карта способностей · человек" : "Карта способностей"), sumEl), nameEl, teamEl, h("div", {class: "radar"}, svg)),
     h("div", {class: "ctrl"},
       editing ? statsConfig() : null,
+      kindEl,
       h("div", {class: "fields"},
         h("label", {class: "field", for: "sheet-name"}, "Имя персонажа", nameIn),
         h("label", {class: "field", for: "sheet-team"}, "Команда", teamSel)),
