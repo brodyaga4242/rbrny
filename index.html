@@ -1331,7 +1331,8 @@ function inkOn(hex){ const L = x => { x /= 255; return x <= .03928 ? x / 12.92 :
 const safeColor = c => /^#[\da-f]{6}$/i.test(c || "") ? c : "#ffb627";
 const teamStyle = t => "--tc:" + safeColor(t.color) + ";--tc-ink:" + inkOn(safeColor(t.color));
 const isAsset = v => /^[0-9a-f]{32}$/.test(v || "");
-const srcOf = v => !v ? "" : isAsset(v) ? "/_blob/" + v : v;
+const ghPreview = {};   // только что загруженные в GitHub картинки: показываем сразу, не дожидаясь обновления сайта
+const srcOf = v => !v ? "" : isAsset(v) ? "/_blob/" + v : ghPreview[v] || v;
 const clone = o => JSON.parse(JSON.stringify(o));
 const str = (v, d = "") => typeof v === "string" ? v : d;
 
@@ -1877,9 +1878,17 @@ function pickImage(obj, field, max){
       const old = obj[field];
       if (f.type === "image/svg+xml" || /\.svg$/i.test(f.name)){
         const blob = await svgToBlob(f);
-        if (assetsApi && !noRights){ obj[field] = (await assetsApi.upload(blob)).id; }
+        if (ghCfg){ obj[field] = await ghUploadImage(blob); }
+        else if (assetsApi && !noRights){ obj[field] = (await assetsApi.upload(blob)).id; }
         else if (blob.size <= SVG_INLINE_MAX) obj[field] = await toDataUrl(blob);
-        else throw {code: "svg_nostore"};
+        else {
+          /* Без хранилища тяжёлый SVG превращаем в обычную картинку (WebP) и вшиваем в страницу */
+          const big = await shrink(blob, Math.min(max, 1600), true);
+          if (big === blob || big.type === "image/svg+xml") throw {code: "svg_nostore"};
+          obj[field] = await toDataUrl(big);
+        }
+      } else if (ghCfg){
+        obj[field] = await ghUploadImage(await shrink(f, max));
       } else if (assetsApi && !noRights){
         const res = await assetsApi.upload(await shrink(f, max));
         obj[field] = res.id;
@@ -4322,6 +4331,19 @@ async function ghRead(){
   if (r.status === 404) return null;
   if (!r.ok) throw {code: r.status === 401 || r.status === 403 ? "not_granted" : "http", status: r.status};
   return r.json();
+}
+/* Картинка кладётся отдельным файлом в папку img/ репозитория, в content.json остаётся только путь */
+async function ghUploadImage(blob){
+  const ext = {"image/svg+xml": "svg", "image/png": "png", "image/jpeg": "jpg", "image/gif": "gif"}[blob.type] || "webp";
+  const path = "img/" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) + "." + ext;
+  const b = new Uint8Array(await blob.arrayBuffer()); let bin = "";
+  for (let i = 0; i < b.length; i += 8192) bin += String.fromCharCode.apply(null, b.subarray(i, i + 8192));
+  const r = await fetch("https://api.github.com/repos/" + ghCfg.repo + "/contents/" + path, {method: "PUT",
+    headers: ghHeaders({"Accept": "application/vnd.github+json", "Content-Type": "application/json"}),
+    body: JSON.stringify({message: "Картинка через редактор", content: btoa(bin), branch: ghCfg.branch})});
+  if (!r.ok) throw {code: r.status === 401 || r.status === 403 || r.status === 404 ? "not_granted" : r.status === 413 ? "too_large" : "http", status: r.status};
+  ghPreview[path] = URL.createObjectURL(blob);
+  return path;
 }
 async function ghWrite(data){
   for (let attempt = 0; attempt < 3; attempt++){
