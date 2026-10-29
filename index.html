@@ -528,6 +528,23 @@ html.no-pieces .hero-in::after{display:none}
 @media (max-width:600px){.pair{grid-template-columns:1fr}}
 .art-nav{display:flex;justify-content:space-between;gap:16px;margin-top:56px;padding-top:24px;border-top:1px solid var(--line)}
 .art-nav .art-back{margin:0}
+.clinks{margin:56px 0 0}
+.clink{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%;margin:0 0 10px;padding:14px 16px;text-align:left;font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--nc);border-radius:var(--r);cursor:pointer}
+.clink:hover{border-color:var(--gold)}
+.clink-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}.clink-top b{font-size:17px}
+.clink-t{font-size:13px;font-weight:600;color:var(--gold-text)}
+.clink-p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--muted);font-size:14px;line-height:1.5}
+.clink-more{font-size:12px;color:var(--dim)}
+.lk-syn{margin:14px 0 0;max-width:62ch}
+.addlink{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.addsel{flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;border-radius:var(--r)}
+.lk-pair{display:flex;align-items:center;gap:12px;margin:10px 0 6px}
+.lk-hero{display:flex;align-items:center;gap:10px;min-width:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:left}
+button.lk-hero{cursor:pointer}button.lk-hero:hover b{color:var(--gold-text)}
+.lk-hero .wb-pic{flex:none;width:52px;height:52px;border:3px solid var(--nc)}
+.lk-hero b{display:block;line-height:1.2}.lk-hero small{display:block;color:var(--muted);font-size:12px}
+.lk-line{flex:1;min-width:24px;height:2px;background:linear-gradient(90deg,var(--a),var(--b))}
+@media(max-width:560px){.lk-hero small{display:none}.lk-hero .wb-pic{width:44px;height:44px}.lk-pair{gap:8px}}
 /* ===== v4: hover swap cards, character page, links ===== */
 .card.clickable{cursor:pointer}
 button.photo{position:relative;width:100%;padding:0;border:0;font:300 clamp(64px,9vw,110px)/1 var(--display);cursor:pointer}
@@ -1427,7 +1444,7 @@ function normalize(d){
       .map(n => ({id: str(n.id), cid: str(n.cid), name: str(n.name).slice(0, 80), img: str(n.img), x: cl(n.x), y: cl(n.y)}));
     const ids = new Set(o.web.nodes.map(n => n.id)), ls = new Set();
     o.web.links = (Array.isArray(d.web.links) ? d.web.links : []).filter(l => l && typeof l === "object" && str(l.id) && ids.has(l.a) && ids.has(l.b) && l.a !== l.b && !ls.has(l.id) && ls.add(l.id)).slice(0, 2000)
-      .map(l => ({id: str(l.id), a: str(l.a), b: str(l.b), title: str(l.title).slice(0, 80), text: str(l.text).slice(0, 20000)}));
+      .map(l => ({id: str(l.id), a: str(l.a), b: str(l.b), title: str(l.title).slice(0, 80), syn: str(l.syn).slice(0, 300), text: str(l.text).slice(0, 20000)}));
   }
   if (!o.home.blocks.length) o.home.blocks = [legacyBlock("hb-stmt", "red", o.home.statement), legacyBlock("hb-story", "cream", o.home.story)];
   if (!o.home.blocks.some(b => b.kind === "specs")) o.home.blocks.unshift({id: "hb-spec", kind: "specs"});
@@ -2011,6 +2028,7 @@ function pageHead(p, leadOverride){
 /* ---------- Персонажи ---------- */
 let teamIdx = -1;   // -1: все папки закрыты
 let charOpen = null;
+let linkOpen = null;   // id связи, открытой на странице героя
 let groupOpen = "";   // "" — обзор групп, "_none" — команды без группы, иначе id группы
 /* герои прямо в группе: скрытая «команда» группы (direct), в списке команд её не видно */
 function directTeam(gid, create){
@@ -2021,13 +2039,13 @@ function directTeam(gid, create){
 }
 function syncDirect(){ C.teams.forEach(t => { if (t.direct){ const g = C.groups.find(x => x.id === t.group); if (g){ t.name = g.name; t.color = g.color; } } }); }
 function openChar(ti, ci){
-  charOpen = [ti, ci]; teamIdx = ti;
+  charOpen = [ti, ci]; teamIdx = ti; linkOpen = null;
   render();
   const top = $("#view").getBoundingClientRect().top + window.scrollY - ($(".rail").offsetHeight || 0) - 12;
   window.scrollTo({top: Math.max(0, top), behavior: "auto"});
 }
 function closeChar(){
-  charOpen = null;
+  charOpen = null; linkOpen = null;
   render();
 }
 function heroCard(c, i, t, ti){
@@ -2113,6 +2131,7 @@ function charStats(c, t){
 }
 function viewCharPage(ti, ci){
   const t = C.teams[ti], c = t.chars[ci];
+  if (linkOpen){ const v = viewLinkPage(ti, ci); if (v) return v; linkOpen = null; }
   const m = (k, node) => node ? h("div", {}, h("dt", {}, k), h("dd", {}, node)) : null;
   const fsrc = srcOf(c.img2);
   const face = (fsrc || editing) ? h("figure", {class: "fig sq cface"},
@@ -2139,9 +2158,81 @@ function viewCharPage(ti, ci){
     (c.story || editing) ? ed("div", {class: "art-text", style: "margin-top:20px"}, () => c.story, v => c.story = v, {multi: true, ph: "Полная история героя. Выделите слово и нажмите «Ссылка», чтобы привязать его к странице сайта."}) : null,
     row,
     (c.story2 || editing) ? ed("div", {class: "art-text"}, () => c.story2, v => c.story2 = v, {multi: true, ph: "Продолжение истории"}) : null,
+    charLinksBlock(c),
     h("div", {class: "art-nav"},
       ci > 0 ? h("button", {class: "art-back", type: "button", onclick: () => openChar(ti, ci - 1)}, "← " + (t.chars[ci - 1].name || "Назад")) : h("span"),
       ci < t.chars.length - 1 ? h("button", {class: "art-back", type: "button", onclick: () => openChar(ti, ci + 1)}, (t.chars[ci + 1].name || "Дальше") + " →") : h("span")));
+}
+/* ---------- Связи героя на его странице (берутся из карты связей) ---------- */
+const plainOf = html => { const d = document.createElement("div"); d.innerHTML = html || ""; return (d.textContent || "").replace(/\s+/g, " ").trim(); };
+function charLinks(c){
+  const me = C.web.nodes.find(n => n.cid === idOf(c));
+  if (!me) return {me: null, list: []};
+  const list = [];
+  C.web.links.forEach(l => {
+    if (l.a !== me.id && l.b !== me.id) return;
+    const other = webInfo(C.web.nodes.find(n => n.id === (l.a === me.id ? l.b : l.a)) || {});
+    if (other) list.push({l, other});
+  });
+  return {me, list};
+}
+const scrollToPage = () => { const top = $("#view").getBoundingClientRect().top + window.scrollY - ($(".rail").offsetHeight || 0) - 12; window.scrollTo({top: Math.max(0, top), behavior: "auto"}); };
+function openOtherHero(i){ if (i.f) openChar(i.f.ti, i.f.ci); }
+function charLinksBlock(c){
+  const {me, list} = charLinks(c);
+  if (!editing && (!me || !list.length)) return null;
+  return h("section", {class: "clinks"},
+    h("p", {class: "kicker"}, "Связи · " + list.length),
+    list.map(({l, other}) => {
+      const full = plainOf(l.text), text = l.syn || full, words = full ? full.split(" ").length : 0;
+      return h("button", {class: "clink", type: "button", style: "--nc:" + other.color, onclick: () => { linkOpen = l.id; render(); scrollToPage(); }},
+        h("span", {class: "clink-top"}, h("b", {}, other.name), h("span", {class: "clink-t"}, l.title || "Связь")),
+        text ? h("span", {class: "clink-p"}, text) : null,
+        h("span", {class: "clink-more"}, words > 40 || (l.syn && full) ? "Читать полностью · " + words + " " + plural(words, ["слово", "слова", "слов"]) + " →" : "Открыть →"));
+    }),
+    editing ? addLinkControl(c, me) : null);
+}
+/* добавить связь прямо со страницы героя: герой при необходимости сам появится на карте */
+function addLinkControl(c, me){
+  const W = C.web, linked = new Set();
+  if (me) W.links.forEach(l => { if (l.a === me.id) linked.add(l.b); if (l.b === me.id) linked.add(l.a); });
+  const opts = [];
+  C.teams.forEach(t => t.chars.forEach(o => { if (o === c) return; const n = W.nodes.find(x => x.cid === idOf(o)); if (n && linked.has(n.id)) return; opts.push(["c:" + idOf(o), (o.alias || o.name || "Без имени") + " · " + (t.name || "группа")]); }));
+  W.nodes.filter(n => !n.cid && !linked.has(n.id)).forEach(n => opts.push(["n:" + n.id, (n.name || "Без названия") + " · организация / место"]));
+  const sel = h("select", {class: "addsel", "aria-label": "С кем связь"}, h("option", {value: ""}, "С кем связь…"), opts.map(([v, t]) => h("option", {value: v}, t)));
+  const add = () => {
+    const v = sel.value; if (!v) return;
+    change(() => {
+      let a = W.nodes.find(n => n.cid === idOf(c));
+      if (!a){ const [x, y] = webFreeSpot(); a = {id: uid(), cid: idOf(c), name: "", img: "", x, y}; W.nodes.push(a); }
+      let b = v[0] === "n" ? W.nodes.find(n => n.id === v.slice(2)) : W.nodes.find(n => n.cid === v.slice(2));
+      if (!b){ const [x, y] = webFreeSpot(); b = {id: uid(), cid: v.slice(2), name: "", img: "", x, y}; W.nodes.push(b); }
+      linkOpen = uid();
+      W.links.push({id: linkOpen, a: a.id, b: b.id, title: "", syn: "", text: ""});
+    });
+    scrollToPage();
+  };
+  return h("div", {class: "addlink"}, sel, h("button", {class: "imgbtn", type: "button", onclick: add}, icon("plus"), "Добавить связь"));
+}
+function viewLinkPage(ti, ci){
+  const t = C.teams[ti], c = t.chars[ci], {me, list} = charLinks(c);
+  const k = list.findIndex(x => x.l.id === linkOpen);
+  if (k < 0) return null;
+  const {l, other} = list[k], mine = webInfo(me);
+  const hero = (i, link) => h(link ? "button" : "div", {class: "lk-hero", type: link ? "button" : null, style: "--nc:" + i.color, onclick: link ? () => openOtherHero(i) : null},
+    h("span", {class: "wb-pic" + (i.custom ? " sq" : "")}, i.src ? h("img", {src: i.src, alt: ""}) : initials(i.name)),
+    h("span", {}, h("b", {}, i.name), h("small", {}, i.f ? (i.f.t.name || "") : "Организация / место")));
+  return h("article", {class: "art cpage", style: teamStyle(t)},
+    h("button", {class: "art-back", type: "button", onclick: () => { linkOpen = null; render(); }}, icon("arrow"), (c.alias || c.name || "Герой") + " · связи"),
+    h("p", {class: "kicker"}, "Связь"),
+    editing ? ed("h2", {}, () => l.title, v => l.title = v, {ph: "Название связи", max: 80}) : h("h2", {}, l.title || ((c.alias || c.name) + " и " + other.name)),
+    h("div", {class: "lk-pair"}, hero(mine, false), h("i", {class: "lk-line", style: "--a:" + mine.color + ";--b:" + other.color}), hero(other, !!other.f)),
+    (l.syn || editing) ? ed("p", {class: "lead lk-syn"}, () => l.syn, v => l.syn = v, {ph: "Короткий синопсис связи (1–2 строки)", max: 300}) : null,
+    (l.text || editing) ? ed("div", {class: "art-text", style: "margin-top:20px"}, () => l.text, v => l.text = v, {multi: true, ph: "Опишите, что связывает этих героев: история, чувства, долги, тайны…"}) : h("p", {class: "wp-d"}, "Подробности пока не описаны."),
+    editing ? h("div", {class: "wp-ed"}, miniDangerText("Удалить связь", () => { C.web.links = C.web.links.filter(x => x.id !== l.id); linkOpen = null; scheduleSave(); render(); })) : null,
+    h("div", {class: "art-nav"},
+      k > 0 ? h("button", {class: "art-back", type: "button", onclick: () => { linkOpen = list[k - 1].l.id; render(); scrollToPage(); }}, "← " + list[k - 1].other.name) : h("span"),
+      k < list.length - 1 ? h("button", {class: "art-back", type: "button", onclick: () => { linkOpen = list[k + 1].l.id; render(); scrollToPage(); }}, list[k + 1].other.name + " →") : h("span")));
 }
 function groupTile(g, gi){
   const T = C.teams, real = gi >= 0;
@@ -2452,7 +2543,9 @@ function viewWeb(){
         close, h("p", {class: "wp-k"}, "Связь"),
         h("div", {class: "wp-pair"}, chip(A), h("i", {class: "wp-dash"}), chip(B)),
         editing ? ed("h3", {}, () => l.title, v => l.title = v, {ph: "Название связи (необязательно)", max: 80}) : (l.title ? h("h3", {}, l.title) : null),
-        (l.text || editing) ? ed("div", {class: "wp-text"}, () => l.text, v => l.text = v, {multi: true, ph: "Опишите, что связывает этих героев: история, чувства, долги, тайны…"}) : h("p", {class: "wp-d"}, "Подробности пока не описаны."),
+        (l.syn || editing) ? ed("p", {class: "wp-d", style: "color:var(--ink)"}, () => l.syn, v => l.syn = v, {ph: "Короткий синопсис (1–2 строки)", max: 300}) : null,
+        (A.f || B.f) && (editing || l.syn) && l.text ? h("button", {class: "wp-go", type: "button", onclick: () => { const hero = A.f ? A : B; webSel = null; webPopClose(); charSub = "list"; linkOpen = l.id; openChar(hero.f.ti, hero.f.ci); }}, editing ? "Открыть страницу связи" : "Читать полностью", icon("arrow")) : null,
+        (l.text || editing) && (editing || !l.syn || !(A.f || B.f)) ? ed("div", {class: "wp-text"}, () => l.text, v => l.text = v, {multi: true, ph: "Опишите, что связывает этих героев: история, чувства, долги, тайны…"}) : h("p", {class: "wp-d"}, "Подробности пока не описаны."),
         editing ? h("div", {class: "wp-ed"}, miniDangerText("Удалить связь", () => { W.links = W.links.filter(x => x.id !== l.id); webSel = null; webPopClose(); scheduleSave(); rebuild(); })) : null);
     }
     if (webPopEl){ webPopEl.replaceChildren(pop); webPopEl.scrollTop = 0; return; }
@@ -2523,7 +2616,7 @@ function viewWeb(){
           if (webFrom === id){ webFrom = ""; rebuild(); return; }
           const had = W.links.find(l => (l.a === webFrom && l.b === id) || (l.a === id && l.b === webFrom));
           let lid;
-          if (had) lid = had.id; else { lid = uid(); W.links.push({id: lid, a: webFrom, b: id, title: "", text: ""}); scheduleSave(); }
+          if (had) lid = had.id; else { lid = uid(); W.links.push({id: lid, a: webFrom, b: id, title: "", syn: "", text: ""}); scheduleSave(); }
           webMode = ""; webFrom = ""; webSel = {t: "link", id: lid}; rebuild(); popup(); applyHl(null); return;
         }
         if (!editing && matchMedia("(hover:none)").matches && webPeek !== id){ webPeek = id; applyHl(null); drawPeek(); return; }
