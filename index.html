@@ -564,9 +564,20 @@ html.no-pieces .hero-in::after{display:none}
 .pl-rdr h3{margin:0;font-size:clamp(26px,4vw,44px)}
 .pl-lead{margin:0;max-width:62ch;color:var(--muted);font-size:17px;line-height:1.6}
 .pl-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;margin-top:8px}
-@media (min-width:900px){.pl-grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px}}
 .pl-aside{display:grid;gap:12px;align-content:start;min-width:0}
-.pl-text{min-width:0;max-width:64ch;overflow-wrap:anywhere;font:300 clamp(17px,1.5vw,19px)/1.85 var(--body)}
+.pl-text{min-width:0;columns:2;column-gap:48px;overflow-wrap:break-word;font:300 17px/1.7 var(--body)}
+.pl-text>*{margin:0 0 1em}
+.pl-text>*:last-child{margin-bottom:0}
+.pl-text>*:first-child{column-span:all;margin-bottom:1.3em;padding-bottom:1.1em;border-bottom:1px solid var(--line);color:#fff;font-size:clamp(18px,2vw,21px);line-height:1.55}
+.pl-text>p:empty,.pl-text>div:empty,.pl-text>p:has(>br:only-child),.pl-text>div:has(>br:only-child){display:none}
+.pl-text .fn-list{column-span:all}
+.pl-text p,.pl-text div{orphans:2;widows:2}
+.pl-ed .pl-text{columns:1}
+.pl-ed .pl-text>*:first-child{column-span:none;padding-bottom:0;border-bottom:0;color:inherit;font-size:inherit;line-height:inherit}
+@media (max-width:860px){.pl-text{columns:1}}
+.pd.pd-img{display:flex;justify-content:center;max-width:none;box-shadow:none}
+.pd-img .pl-zoom{width:auto;max-width:100%;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.pd-img img{width:auto;max-width:100%;max-height:min(72vh,780px);margin:0 auto}
 .pl-nav{display:flex;justify-content:space-between;gap:10px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line)}
 .pl-nav .pl-btn{min-width:0;max-width:48%;overflow:hidden;text-overflow:ellipsis}
 .pl-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:16px;font-size:13px;color:var(--muted)}
@@ -3839,7 +3850,7 @@ function viewPlot(){
   const drawDoc = () => {
     const c = P[cur], F = PL_FORMS[c.form] || PL_FORMS.paper, V = [plView(c.view).name, plView(c.view).color], k = plEraOf(E, c.ago), o = order(), p = o.indexOf(cur);
     const nb = (i, dir) => i < 0 || i >= o.length ? h("span") : h("button", {class: "pl-btn", type: "button", onclick: () => select(o[i], true)}, dir < 0 ? "← " + (plain(P[o[i]].title) || "Раньше") : (plain(P[o[i]].title) || "Позже") + " →");
-    screen.replaceChildren(h("article", {class: "pl-rdr", style: "--vc:" + V[1]},
+    screen.replaceChildren(h("article", {class: "pl-rdr" + (editing ? " pl-ed" : ""), style: "--vc:" + V[1]},
       h("span", {class: "pl-no"}, plAgoText(c.ago) + " · " + F[0] + " · ", h("em", {}, V[0]), " · " + E[k].name),
       ed("h3", {}, () => c.title, v => c.title = v, {ph: "Заголовок документа"}),
       (c.text || editing) ? ed("p", {class: "pl-lead"}, () => c.text, v => c.text = v, {ph: "Короткое описание"}) : null,
