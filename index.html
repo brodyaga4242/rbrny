@@ -583,6 +583,15 @@ html.no-pieces .hero-in::after{display:none}
 /* документы-заглушки, пока нет картинки источника */
 .pd{position:relative;width:100%;max-width:440px;margin-inline:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 .pd-img img{display:block;width:100%;height:auto}
+.pl-zoom{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
+.pl-zoom:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.lbx{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));background:#050505;animation:lbxIn .2s ease-out;cursor:zoom-out}
+.lbx img{max-width:100%;max-height:100%;object-fit:contain;cursor:default}
+.lbx-x{position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));display:grid;place-items:center;width:46px;height:46px;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+.lbx-x .ic{width:22px;height:22px}
+.lbx-x:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+body.lbx-open{overflow:hidden}
+@keyframes lbxIn{from{opacity:0}}
 .pd-paper{padding:16px 18px 20px;background:#e9e2cf;color:#23201a}
 .pd-mast{display:flex;justify-content:space-between;gap:8px;padding-bottom:6px;border-bottom:2px solid #23201a;font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase}
 .pd-mast b{font-size:16px}
@@ -3715,10 +3724,22 @@ const PL_FORMS = {paper: ["Газета", "ГВ", "#e9e2cf", "#23201a"], radio: 
 let plSel = "", plAgo = 150;
 const plAgoText = n => n === 0 ? "сейчас" : n + " " + plural(n, ["год", "года", "лет"]) + " назад";
 const plEraOf = (E, a) => { let k = 0; E.forEach((e, i) => { if (a <= e.from) k = i; }); return k; };
+/* картинка на весь экран: закрывается крестиком, клавишей Esc и кликом вне картинки */
+function plLightbox(src, alt, from){
+  const old = document.querySelector(".lbx"); if (old) old.remove();
+  const close = () => { box.remove(); document.removeEventListener("keydown", onKey, true); document.body.classList.remove("lbx-open"); if (from && from.isConnected) from.focus(); };
+  const onKey = e => { if (e.key === "Escape"){ e.preventDefault(); e.stopPropagation(); close(); } };
+  const x = h("button", {class: "lbx-x", type: "button", "aria-label": "Закрыть", onclick: e => { e.stopPropagation(); close(); }}, icon("x"));
+  const box = h("div", {class: "lbx", role: "dialog", "aria-modal": "true", "aria-label": alt || "Картинка", onclick: e => { if (e.target !== img) close(); }}, h("img", {src, alt}), x);
+  const img = box.firstChild;
+  document.addEventListener("keydown", onKey, true);
+  document.body.classList.add("lbx-open");
+  document.body.append(box); x.focus();
+}
 /* картинка источника, а если её нет, то заглушка по виду документа */
 function plDoc(c){
   const src = srcOf(c.img);
-  if (src) return h("div", {class: "pd pd-img"}, h("img", {src, alt: c.title || "", loading: "lazy", onerror: e => e.target.remove()}));
+  if (src) return h("div", {class: "pd pd-img"}, h("button", {class: "pl-zoom", type: "button", "aria-label": "Открыть картинку на весь экран", title: "Открыть на весь экран", onclick: e => plLightbox(src, c.title || "", e.currentTarget)}, h("img", {src, alt: c.title || "", loading: "lazy", onerror: e => e.target.closest(".pl-zoom").remove()})));
   const head = (tag, cls) => ed(tag, {class: cls || null}, () => c.head || c.title, v => c.head = v, {ph: "Заголовок документа", max: 200});
   const body = cls => ed("div", {class: cls}, () => c.body, v => c.body = v, {multi: true, ph: "Текст документа"});
   const f = c.form;
