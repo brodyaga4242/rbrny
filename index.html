@@ -611,7 +611,12 @@ html.no-pieces .hero-in::after{display:none}
 .pl-multi .pd-img img,.pl-multi .pl-gi img{display:block;width:auto;max-width:100%;height:clamp(150px,28vh,260px);aspect-ratio:auto;object-fit:contain;margin:0}
 .pl-multi .pl-gph{width:200px;height:clamp(150px,28vh,260px);aspect-ratio:auto}
 .pl-multi .pl-edit{flex:0 0 100%}
-@media (max-width:760px){.pl-rdr:not(.pl-ed) .pl-aside.pl-multi{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:8px}.pl-rdr:not(.pl-ed) .pl-multi .pd.pd-img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gitem{scroll-snap-align:start}.pl-multi .pd-img img,.pl-multi .pl-gi img{max-width:none}}
+/* просмотр: картинки в один ряд, одной высоты, по центру — как одно горизонтальное фото */
+.pl-rdr:not(.pl-ed) .pl-aside.pl-multi{flex-wrap:nowrap;justify-content:center;margin-inline:auto!important;gap:14px}
+.pl-rdr:not(.pl-ed) .pl-multi .pd.pd-img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gitem{flex:1 1 0;min-width:0}
+.pl-rdr:not(.pl-ed) .pl-multi .pl-zoom,.pl-rdr:not(.pl-ed) .pl-multi .pl-gi{width:100%}
+.pl-rdr:not(.pl-ed) .pl-multi .pd-img img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gi img{width:100%;height:auto;max-width:100%;object-fit:cover}
+@media (max-width:760px){.pl-rdr:not(.pl-ed) .pl-aside.pl-multi{max-width:none!important;justify-content:flex-start;margin-inline:0!important}.pl-rdr:not(.pl-ed) .pl-multi .pd.pd-img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gitem{flex:0 0 auto!important}.pl-rdr:not(.pl-ed) .pl-multi .pd-img img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gi img{width:auto;height:clamp(150px,28vh,260px);max-width:none}.pl-rdr:not(.pl-ed) .pl-aside.pl-multi{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:8px}.pl-rdr:not(.pl-ed) .pl-multi .pd.pd-img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gitem{scroll-snap-align:start}.pl-multi .pd-img img,.pl-multi .pl-gi img{max-width:none}}
 .pl-vedit{display:grid;gap:8px;justify-items:start;margin-top:22px;padding:16px;border:1px dashed var(--line)}
 .pl-vrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .pl-vrow select{max-width:100%;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
@@ -3914,6 +3919,11 @@ function viewPlot(){
         h("div", {class: "pl-aside" + (multi ? " pl-multi" : "")}, plDoc(c), plGallery(c), plEditPanel(c)),
         (c.long || editing) ? ed("div", {class: "pl-text"}, () => c.long, v => c.long = v, {multi: true, ph: "Полный текст документа"}) : null),
       h("div", {class: "pl-nav"}, nb(p - 1, -1), nb(p + 1, 1)));
+    /* несколько картинок: делим ширину по пропорциям, чтобы у всех была одна высота; ряд по центру, не выше ~70% экрана */
+    if (multi && !editing){
+      const side = art.querySelector(".pl-aside"), items = [...side.querySelectorAll(".pd-img,.pl-gitem")], ar = [];
+      items.forEach((it, i) => { const im = it.querySelector("img"); if (!im) return; const set = () => { ar[i] = im.naturalWidth / (im.naturalHeight || 1); it.style.flex = ar[i] + " 1 0"; if (items.every((_, j) => ar[j] || !items[j].querySelector("img"))){ const H = Math.min(innerHeight * 0.7, 540), sum = ar.reduce((a, b) => a + (b || 0), 0); side.style.maxWidth = Math.ceil(sum * H + 14 * (items.length - 1)) + "px"; } }; im.complete && im.naturalWidth ? set() : im.addEventListener("load", set); });
+    }
     /* «Автоматически»: вертикальную картинку ставим слева, и текст её обтекает */
     const isrc = srcOf(c.img);
     if ((c.layout || "auto") === "auto" && isrc && !multi){
