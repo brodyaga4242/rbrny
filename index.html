@@ -573,6 +573,15 @@ html.no-pieces .hero-in::after{display:none}
 .pl-text .fn-list{column-span:all}
 .pl-text p,.pl-text div{orphans:2;widows:2}
 .pl-ed .pl-text{columns:1}
+.pl-lay-one .pl-text{columns:1;max-width:66ch}
+.pl-lay-wrap .pl-grid{display:block}
+.pl-lay-wrap .pl-grid::after{content:"";display:block;clear:both}
+.pl-lay-wrap .pl-aside{float:left;width:min(42%,400px);margin:4px 36px 16px 0}
+.pl-lay-wrap .pl-text{columns:1}
+.pl-lay-wrap .pl-text hr,.pl-lay-wrap .pl-text h2{clear:both}
+.pl-lay-wrap .pd.pd-img{max-width:none}
+.pl-lay-wrap .pd-img img{max-height:min(80vh,820px)}
+@media (max-width:760px){.pl-lay-wrap .pl-aside{float:none;width:auto;margin:0 0 20px}}
 @media (max-width:860px){.pl-text{columns:1}}
 .pd.pd-img{display:flex;justify-content:center;max-width:none;box-shadow:none}
 .pd-img .pl-zoom{width:auto;max-width:100%;box-shadow:0 10px 30px rgba(0,0,0,.4)}
@@ -1627,6 +1636,7 @@ function normalize(d){
       const k = str(r.kind), form0 = fids.includes(r.form) ? r.form : /радио/i.test(k) ? "radio" : /тв|теле/i.test(k) ? "tv" : /закон|указ|постан/i.test(k) ? "law" : /лаб|отчёт|отчет|иссл/i.test(k) ? "lab" : /секрет|записк|закрыт/i.test(k) ? "secret" : "paper", form = fids.includes(form0) ? form0 : fids[0];
       return {id: str(r.id) || ("pl" + Math.random().toString(36).slice(2, 8)), kind: k.slice(0, 40), title: str(r.title).slice(0, 200), text: str(r.text).slice(0, 20000), img: str(r.img), anim: "rise",
         ago: typeof r.ago === "number" && isFinite(r.ago) ? Math.max(0, Math.min(999, Math.round(r.ago))) : Math.round(150 - i * 150 / Math.max(1, all.length - 1)),
+        layout: ["cols", "wrap", "one"].includes(r.layout) ? r.layout : "auto",
         view: vids.includes(r.view) ? r.view : (vids.includes("people") ? "people" : vids[0]), form,
         head: str(r.head).slice(0, 300), body: str(r.body).slice(0, 20000), long: str(r.long).slice(0, 40000)};
     });
@@ -3790,12 +3800,14 @@ function plEditPanel(c){
   if (!editing) return null;
   const P = C.plot, mk = (label, el) => h("label", {}, label, el);
   const formSel = c => { const s = h("select", {}, C.plotForms.map(f => h("option", {value: f.id}, f.name))); s.value = plForm(c.form).id; s.onchange = () => change(() => { c.form = s.value; c.kind = plForm(s.value).name; }); return s; };
+  const LAYS = [["auto", "Автоматически"], ["cols", "Картинка сверху, две колонки"], ["wrap", "Картинка слева, текст обтекает"], ["one", "Картинка сверху, одна колонка"]];
+  const laySel = c => { const s = h("select", {}, LAYS.map(l => h("option", {value: l[0]}, l[1]))); s.value = c.layout || "auto"; s.onchange = () => change(() => { c.layout = s.value; }); return s; };
   const viewSel = c => { const s = h("select", {}, C.plotViews.map(v => h("option", {value: v.id}, v.name))); s.value = plView(c.view).id; s.onchange = () => change(() => { c.view = s.value; }); return s; };
   const num = h("input", {type: "number", min: "0", max: "999", step: "1", value: String(c.ago)});
   num.onchange = () => change(() => { const v = parseInt(num.value, 10); if (isFinite(v)) c.ago = Math.max(0, Math.min(999, v)); plAgo = c.ago; });
   return h("div", {class: "pl-edit"},
     imgButtons(c, "img", c.img ? "Сменить картинку" : "Загрузить картинку", 1400, true),
-    mk("Вид", formSel(c)), mk("Источник", viewSel(c)), mk("Лет назад", num),
+    mk("Вёрстка текста", laySel(c)), mk("Вид", formSel(c)), mk("Источник", viewSel(c)), mk("Лет назад", num),
     dangerBtn("Удалить документ", () => change(() => { P.splice(P.indexOf(c), 1); plSel = ""; })));
 }
 function viewPlot(){
@@ -3859,14 +3871,23 @@ function viewPlot(){
   const drawDoc = () => {
     const c = P[cur], F = [plForm(c.form).name], V = [plView(c.view).name, plView(c.view).color], k = plEraOf(E, c.ago), o = order(), p = o.indexOf(cur);
     const nb = (i, dir) => i < 0 || i >= o.length ? h("span") : h("button", {class: "pl-btn", type: "button", onclick: () => select(o[i], true)}, dir < 0 ? "← " + (plain(P[o[i]].title) || "Раньше") : (plain(P[o[i]].title) || "Позже") + " →");
-    screen.replaceChildren(h("article", {class: "pl-rdr" + (editing ? " pl-ed" : ""), style: "--vc:" + V[1]},
+    const lay0 = c.layout === "wrap" || c.layout === "one" ? c.layout : "cols";
+    const art = h("article", {class: "pl-rdr pl-lay-" + lay0 + (editing ? " pl-ed" : ""), style: "--vc:" + V[1]},
       h("span", {class: "pl-no"}, plAgoText(c.ago) + " · " + F[0] + " · ", h("em", {}, V[0]), " · " + E[k].name),
       ed("h3", {}, () => c.title, v => c.title = v, {ph: "Заголовок документа"}),
       (c.text || editing) ? ed("p", {class: "pl-lead"}, () => c.text, v => c.text = v, {ph: "Короткое описание"}) : null,
       h("div", {class: "pl-grid"},
         h("div", {class: "pl-aside"}, plDoc(c), plEditPanel(c)),
         (c.long || editing) ? ed("div", {class: "pl-text"}, () => c.long, v => c.long = v, {multi: true, ph: "Полный текст документа"}) : null),
-      h("div", {class: "pl-nav"}, nb(p - 1, -1), nb(p + 1, 1))));
+      h("div", {class: "pl-nav"}, nb(p - 1, -1), nb(p + 1, 1)));
+    /* «Автоматически»: вертикальную картинку ставим слева, и текст её обтекает */
+    const isrc = srcOf(c.img);
+    if ((c.layout || "auto") === "auto" && isrc){
+      const im = new Image();
+      im.onload = () => { if (im.naturalHeight > im.naturalWidth * 1.1 && art.isConnected){ art.classList.remove("pl-lay-cols"); art.classList.add("pl-lay-wrap"); } };
+      im.src = isrc;
+    }
+    screen.replaceChildren(art);
   };
   const paint = () => {
     const a = Math.round(plAgo), k = plEraOf(E, a), o = order(), p = o.indexOf(cur);
