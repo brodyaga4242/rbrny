@@ -1624,7 +1624,7 @@ function flushRemote(){
 const uid = () => Math.random().toString(36).slice(2, 9);
 const idOf = o => { if (!o.id){ o.id = uid(); if (editing) scheduleSave(); } return o.id; };
 const LINK_RE = /\[([^\[\]\n]{1,120})\]\(([^()\s]{1,300})\)/g;
-const okTarget = t => /^https?:\/\/\S+$/i.test(t) || /^(home|nav|plot|world|timeline|characters|rules|busy|stats|tech|faq)$/.test(t) || /^tech\/\w+$/.test(t) || /^(world|team|char)\/[\w-]+$/.test(t);
+const okTarget = t => /^https?:\/\/\S+$/i.test(t) || /^(home|nav|plot|world|characters|rules|busy|stats|tech|faq)$/.test(t) || /^tech\/\w+$/.test(t) || /^(world|team|char)\/[\w-]+$/.test(t);
 function fillLinked(el, text){
   el.textContent = "";
   let last = 0, m; LINK_RE.lastIndex = 0;
@@ -3935,7 +3935,7 @@ function viewTimeline(){
 
 /* ---------- Навигация (подвкладки) ---------- */
 let navSub = "plot", inNav = false;
-const SUBS = [["plot", "Сюжет", viewPlot], ["world", "Информация о мире", viewWorld], ["timeline", "Хронология", viewTimeline]];
+const SUBS = [["plot", "Сюжет", viewPlot], ["world", "Информация о мире", viewWorld]];
 const idxById = (arr, id) => { let i = arr.findIndex(x => x.id === id); if (i < 0 && /^\d+$/.test(id)) i = +id - 1; return i >= 0 && i < arr.length ? i : -1; };
 const resolve = id => {
   id = id || ""; let m;
@@ -4058,7 +4058,6 @@ function buildIndex(){
   add("plot", C.pages.nav.title + " · " + C.pages.plot.title, C.pages.plot.title, C.plotText);
   C.plot.forEach(p => out.push({tab: "plot", label: C.pages.nav.title + " · " + C.pages.plot.title, title: p.title || p.kind || "Запись", text: [p.kind, p.text, plain(p.head), plain(p.body), plain(p.long)].join(" "), target: "plot"}));
   C.world.forEach(x => out.push({tab: "world", label: C.pages.nav.title + " · " + C.pages.world.title, title: x.title, text: [x.text, x.body, x.body2].join(" "), target: "world/" + idOf(x)}));
-  C.timeline.forEach(x => add("timeline", C.pages.nav.title + " · " + C.pages.timeline.title, x.title, x.date + " " + x.text));
   C.teams.forEach(t => { out.push({tab: "characters", label: "Персонажи", title: t.name, text: t.about, target: "team/" + idOf(t)}); t.chars.forEach(c => out.push({tab: "characters", label: "Персонажи · " + t.name, title: c.name + (c.alias ? " · " + c.alias : ""), text: [c.alias, c.age, c.power, c.desc, c.player, c.story, c.story2].join(" "), target: "char/" + idOf(c)})); });
   C.rules.forEach(r => add("rules", "Правила", r.title, r.text));
   const SECN = {occ: "Занятые персонажи", ban: "Запрещённые внешности", job: "Биржа труда", act: "Проверка активности"};
@@ -4066,7 +4065,7 @@ function buildIndex(){
   C.faq.forEach(f => add("faq", "FAQ", f.q, f.a));
   C.roulette.items.forEach(it => out.push({tab: "tech", label: "Радар · Рандомайзер", title: it.name || "Способность", text: it.desc, target: "tech/roulette"}));
   out.push({tab: "tech", label: "Радар", title: C.pages.stats.title, text: C.stats.names.join(" "), target: "tech/stats"});
-  ["nav", "plot", "world", "timeline", "characters", "rules", "tech", "faq"].forEach(id => add(id, C.pages[id].title, C.pages[id].title, C.pages[id].lead));
+  ["nav", "plot", "world", "characters", "rules", "tech", "faq"].forEach(id => add(id, C.pages[id].title, C.pages[id].title, C.pages[id].lead));
   return out.map(r => Object.assign(r, {title: plain(r.title), text: plain(r.text)}));
 }
 let searchEl = null;
@@ -4284,7 +4283,7 @@ function openFootnote(root, sup){
 /* ссылка: окно выбора страницы или внешнего адреса */
 function linkTargets(){
   const out = [], add = (group, label, target) => out.push({group, label, target});
-  [["home", "Главная"], ["plot", "Сюжет"], ["world", "Информация о мире"], ["timeline", "Хронология"], ["characters", "Персонажи"], ["rules", "Правила"], ["tech", "Радар"], ["busy", "Занятые персонажи"], ["faq", "FAQ"]]
+  [["home", "Главная"], ["plot", "Сюжет"], ["world", "Информация о мире"], ["characters", "Персонажи"], ["rules", "Правила"], ["tech", "Радар"], ["busy", "Занятые персонажи"], ["faq", "FAQ"]]
     .forEach(([id, l]) => add("Раздел", (C.pages[id] && C.pages[id].title) || l, id));
   C.world.forEach(x => add("Информация о мире", x.title || "Без названия", "world/" + idOf(x)));
   C.teams.forEach(t => { add("Команда", t.name || "Команда", "team/" + idOf(t)); t.chars.forEach(c => add("Персонаж · " + (t.name || ""), c.name || "Без имени", "char/" + idOf(c))); });
