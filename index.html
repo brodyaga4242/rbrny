@@ -434,6 +434,56 @@ body[data-busy="1"] .srch.busybtn{color:var(--ink);border-color:var(--line)}
 .subtabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
 .sub{padding:11px 18px;border:1px solid var(--line);background:none;color:var(--ink);font:500 12px/1.2 var(--body);text-transform:uppercase;letter-spacing:.1em;cursor:pointer}
 .sub:hover{background:var(--raise)}.sub[aria-selected="true"]{background:var(--yel);color:var(--blk);border-color:var(--yel)}
+/* карта города */
+html{overflow-x:clip}
+.cm{position:relative;margin:4px calc(50% - 50vw) 0;--oct:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.cm-stage{position:relative;height:clamp(460px,72vh,740px);overflow:hidden;background:#0a0a0a;border-block:1px solid var(--line);touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+.cm-stage.drag{cursor:grabbing}
+.cm-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.cm-stage::after{content:"";position:absolute;inset:auto 0 0;height:32%;background:linear-gradient(#0a0a0a00,#0a0a0acc);pointer-events:none}
+.cm-msg{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;font:500 12px/1.6 var(--mono);color:#9aa0c2;letter-spacing:.1em;text-transform:uppercase;pointer-events:none}
+.cm-msg[hidden]{display:none}
+.cm-pins{position:absolute;inset:0;pointer-events:none;z-index:2}
+.cm-pin{pointer-events:auto;position:absolute;left:0;top:0;display:flex;align-items:center;gap:8px;transform:translate(-50%,-50%);will-change:transform;white-space:nowrap;background:none;border:0;padding:0;color:#fff;cursor:pointer}
+.cm-pin .o{width:26px;height:26px;background:var(--yel,#f2c230);clip-path:var(--oct);display:grid;place-items:center;flex:none;transition:transform .3s}
+.cm-pin .o span{width:22px;height:22px;background:#0a0a0a;clip-path:var(--oct);display:grid;place-items:center;font:700 10px var(--mono);color:var(--yel,#f2c230)}
+.cm-pin.corp .o,.cm-pin.hot .o{background:var(--red,#e5301f)}
+.cm-pin.corp .o span{color:#fff}.cm-pin.hot .o span{background:var(--red,#e5301f);color:#fff}
+.cm-pin.scar .o{background:var(--red,#e5301f);width:20px;height:20px;clip-path:none}
+.cm-pin.scar .o span{width:16px;height:16px;clip-path:none;background:#000;color:#fff;font-size:12px}
+.cm-pin .l{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:#fff;text-shadow:0 0 6px #000,0 0 2px #000}
+.cm-pin.scar .l{color:#ff8a7a;font-size:10px}
+.cm-pin.on .o{transform:scale(1.35)}
+.cm-pin.on .o span{background:var(--yel,#f2c230);color:#0a0a0a}
+.cm-pin.corp.on .o span,.cm-pin.hot.on .o span,.cm-pin.scar.on .o span{background:var(--red,#e5301f);color:#fff}
+.cm-compass{position:absolute;top:14px;right:14px;z-index:3;width:48px;height:48px;border:1px solid var(--line);border-radius:50%;background:#0a0a0acc;pointer-events:none}
+.cm-compass i{position:absolute;inset:6px}
+.cm-compass i::before{content:"N";position:absolute;top:-2px;left:50%;transform:translateX(-50%);font:700 9px var(--mono);color:var(--red,#e5301f)}
+.cm-compass i::after{content:"";position:absolute;left:50%;top:12px;bottom:12px;width:2px;transform:translateX(-50%);background:linear-gradient(var(--red,#e5301f) 50%,#fff 50%)}
+.cm-hint{position:absolute;right:16px;bottom:14px;z-index:3;font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#8a8fb0;pointer-events:none}
+.cm-card{position:absolute;left:clamp(16px,3vw,48px);bottom:clamp(16px,3vw,36px);z-index:4;width:340px;display:flex;flex-direction:column;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:22px 22px 18px}
+.cm-zoom{position:absolute;right:14px;top:72px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.cm-zoom button{width:38px;height:38px;border:1px solid var(--line);background:#0a0a0acc;color:#fff;font:500 20px/1 var(--mono);cursor:pointer}
+.cm-zoom button:hover{background:#1d2137}
+.cm-no{display:block;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cm-card h3{margin:10px 0 0;font:700 clamp(22px,2.6vw,32px)/1.05 var(--display);letter-spacing:-.02em;text-transform:none}
+.cm-tag{display:inline-block;margin-top:12px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:3px 9px;color:var(--muted)}
+.cm-tag.corp{border-color:var(--red,#e5301f);color:var(--ink)}
+.cm-tag.hot{background:var(--red,#e5301f);border-color:var(--red,#e5301f);color:#fff}
+.cm-card p{margin:12px 0 0;color:var(--muted);font-size:15px;line-height:1.55;min-height:4.6em}
+.cm-nav{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.cm-nav button{border:1px solid var(--line);background:none;color:var(--ink);padding:8px 14px;font:600 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.cm-nav button:hover{background:var(--raise)}
+.cm-nav .all{margin-left:auto}
+.cm-legend{margin:14px 0 0;padding-inline:0;font:500 12px/1.5 var(--mono);color:var(--dim)}
+@media(max-width:900px){.cm-card{position:static;width:auto;border-left:0;border-right:0;border-top:0;padding-inline:20px}}
+@media(max-width:720px){
+  .cm-stage{height:clamp(380px,60vh,520px)}
+  .cm-pin .l{display:none}.cm-pin.on .l{display:block}
+  .cm-hint{display:none}
+}
+@media(prefers-reduced-motion:reduce){.cm-pin .o{transition:none}}
+
 .subtitle{margin:0 0 10px;font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--gold-text)}
 .grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:32px}
 .card{gap:0;padding:0}
@@ -1250,6 +1300,7 @@ const DEFAULTS = /*DEFAULTS-START*/{
     nav: { kicker: "Хроники", title: "Хроники", lead: "Сюжет, устройство мира и хронология событий.", heroImage: "" },
     plot: { kicker: "Канон", title: "Сюжет", lead: "Главные события и линии игры по главам.", heroImage: "" },
     world: { kicker: "Вселенная", title: "Информация о мире", lead: "Как устроен мир, где происходит действие и по каким законам он живёт.", heroImage: "" },
+    map: { kicker: "Город", title: "Карта города", lead: "Октополис с высоты: в центре корпорации и власти, вокруг жилые и рабочие районы, красным отмечены места боёв.", heroImage: "" },
     timeline: { kicker: "События", title: "Хронология", lead: "Что уже произошло в мире игры.", heroImage: "" },
     characters: { kicker: "Реестр героев", title: "Персонажи", lead: "Выберите команду, чтобы увидеть её состав.", heroImage: "", tabList: "Герои", tabWeb: "Карта связей" },
     players: { kicker: "Состав", title: "Игроки", lead: "Все, кто играет в Reborn Y. Нажмите на героя, чтобы открыть его команду.", heroImage: "" },
@@ -1286,6 +1337,10 @@ const DEFAULTS = /*DEFAULTS-START*/{
     { title: "Фракции", text: "Организации и группы, их цели и отношения между собой.", body: "Опишите группы: цели, лидеры, союзники и враги.", body2: "", wide1: "", sq1: "", sq2: "", wide2: "" },
     { title: "Законы мира", text: "Способности, технологии и правила, которые работают в этой вселенной.", body: "Опишите, как работают способности и что в этом мире невозможно.", body2: "", wide1: "", sq1: "", sq2: "", wide2: "" }
   ],
+  cityMap: {
+    districts: [{"n": "Деловой центр", "t": "Корпорации", "d": "Самые высокие башни в городе принадлежат корпорациям, и свет в их окнах не гаснет. Улицы внизу общие, а вот возможности у людей на них очень разные."}, {"n": "Мэрия", "t": "Власти", "d": "Закон один для всех, и в мэрии любят это повторять. Законы о суперах пишут здесь, а исполняют на улицах. Мэр обедает с директорами корпораций чаще, чем с горожанами."}, {"n": "Технопарк", "t": "Корпорации", "d": "Лаборатории сыворотки. По бумагам любой может записаться в добровольцы, но записываются те, кому нечего терять."}, {"n": "Порт", "t": "Рабочий район", "d": "Доки и склады. Через порт в город везут поддельную сыворотку, и покупают её те, кому настоящая не по карману."}, {"n": "Старый город", "t": "Жилой район", "d": "Кварталы времён первых суперов. Половину домов отстраивали после чужих драк, и не по одному разу."}, {"n": "Спальные районы", "t": "Жилой район", "d": "Миллионы людей без сил. Работают на корпорации, боятся суперов и надеются, что следующий бой пройдёт мимо их улицы."}, {"n": "Низы", "t": "Рабочий район · Зона бедствия", "d": "Район после большого боя. Скорые сюда не едут, герои прилетают поздно, а злодеи остаются жить."}, {"n": "Башня героев", "t": "Герои", "d": "Вторая по высоте башня города. Отсюда герои видят всё вокруг и сами решают, когда прилететь и кого спасать."}],
+    incidents: [{"n": "Бой в Низах", "t": "Погибло 214 · спасено 37", "d": "Два супера дрались четыре часа. Квартал так и не восстановили, а страховку выплатили только корпоративным складам."}, {"n": "Обрушение на Северной", "t": "Погибло 12 · спасено 40", "d": "Герой удержал падающий дом и вывел сорок человек. До соседнего дома он не успел."}, {"n": "Пожар на рынке", "t": "Погибло 6 · спасено 118", "d": "Злодей поджёг рынок, чтобы отвлечь полицию от банка. Банк ограбить не удалось."}]
+  },
   timeline: [
     { date: "Год 0", title: "Событие", text: "Короткое описание события." },
     { date: "Год 1", title: "Следующее событие", text: "Что изменилось после него." },
@@ -1530,6 +1585,7 @@ function normalize(d){
     o.plot = hadSample ? mine.concat(o.plot) : mine;
   }
   if (Array.isArray(d.world)) o.world = d.world.filter(Boolean).map(r => ({id: str(r.id), title: str(r.title), text: str(r.text), body: str(r.body), body2: str(r.body2), wide1: str(r.wide1), sq1: str(r.sq1), sq2: str(r.sq2), wide2: str(r.wide2)}));
+  if (d.cityMap && typeof d.cityMap === "object") for (const k of ["districts", "incidents"]) if (Array.isArray(d.cityMap[k])) o.cityMap[k].forEach((r, i) => { const x = d.cityMap[k][i]; if (x && typeof x === "object") for (const f of ["n", "t", "d"]) r[f] = str(x[f], r[f]); });
   if (Array.isArray(d.timeline)) o.timeline = d.timeline.filter(Boolean).map(r => ({date: str(r.date), title: str(r.title), text: str(r.text)}));
   if (Array.isArray(d.faq)) o.faq = d.faq.filter(Boolean).map(f => ({q: str(f.q), a: str(f.a)}));
   if (d.stats && Array.isArray(d.stats.names) && d.stats.names.length >= 3){
@@ -1624,7 +1680,7 @@ function flushRemote(){
 const uid = () => Math.random().toString(36).slice(2, 9);
 const idOf = o => { if (!o.id){ o.id = uid(); if (editing) scheduleSave(); } return o.id; };
 const LINK_RE = /\[([^\[\]\n]{1,120})\]\(([^()\s]{1,300})\)/g;
-const okTarget = t => /^https?:\/\/\S+$/i.test(t) || /^(home|nav|plot|world|characters|rules|busy|stats|tech|faq)$/.test(t) || /^tech\/\w+$/.test(t) || /^(world|team|char)\/[\w-]+$/.test(t);
+const okTarget = t => /^https?:\/\/\S+$/i.test(t) || /^(home|nav|plot|world|map|characters|rules|busy|stats|tech|faq)$/.test(t) || /^tech\/\w+$/.test(t) || /^(world|team|char)\/[\w-]+$/.test(t);
 function fillLinked(el, text){
   el.textContent = "";
   let last = 0, m; LINK_RE.lastIndex = 0;
@@ -3933,9 +3989,266 @@ function viewTimeline(){
     addBtn("Добавить событие после этого", () => { A.splice(tlSel + 1, 0, {date: "Дата", title: "Новое событие", text: "Описание."}); tlSel++; }));
 }
 
+/* ---------- Карта города (подвкладка «Хроники»; 3D, three.js подгружается только при открытии) ---------- */
+const CM_POS = {
+  d: [{x: 15, z: -2, y: 48, k: "corp"}, {x: -22, z: 6, y: 32, k: ""}, {x: 48, z: -32, y: 26, k: "corp"}, {x: 66, z: 30, y: 14, k: ""},
+      {x: -58, z: -26, y: 14, k: ""}, {x: -56, z: 32, y: 24, k: ""}, {x: 12, z: 38, y: 12, k: "hot"}, {x: -34, z: -18, y: 58, k: ""}],
+  s: [{x: 6, z: 42, r: 9}, {x: -44, z: 22, r: 6}, {x: -66, z: -14, r: 5}]
+};
+let cmSel = {s: 0, i: 0}, cmFocus = false, cmCtl = null, threeP = null;
+function loadThree(){
+  if (window.THREE) return Promise.resolve(window.THREE);
+  if (threeP) return threeP;
+  threeP = new Promise((ok, no) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+    sc.onload = () => window.THREE ? ok(window.THREE) : no(new Error("three"));
+    sc.onerror = () => { threeP = null; sc.remove(); no(new Error("load")); };
+    document.head.append(sc);
+  });
+  return threeP;
+}
+function cmColor(name, fb){
+  let v = ""; try{ v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }catch(e){}
+  try{ const g = document.createElement("canvas").getContext("2d"); g.fillStyle = "#000"; g.fillStyle = v || fb; const c = g.fillStyle; return /^#[\da-f]{6}$/i.test(c) ? c : fb; }catch(e){ return fb; }
+}
+function mountCityMap(THREE, stage, canvas, needle, pins, spins, ST){
+  var city = stage, D = CM_POS.d, SC = CM_POS.s, off = [], dead = false, kick = function(){};
+  var calm = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  function L(ev, fn, o){ addEventListener(ev, fn, o); off.push(function(){ removeEventListener(ev, fn, o); }); }
+  var seed = 7; function RAND(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  var REDS = cmColor("--red", "#e5301f"), RED = parseInt(REDS.slice(1), 16);
+var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setClearColor(0x0a0a0a);
+var scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0a0a0a,200,600);
+var cam=new THREE.PerspectiveCamera(36,1,1,1200);
+
+function rnd(a,b){return a+RAND()*(b-a);}
+var OCT=[];for(var i=0;i<8;i++){var a=Math.PI/8+i*Math.PI/4;OCT.push([Math.cos(a)*104,Math.sin(a)*68]);}
+function inside(x,z){var c=false;for(var i=0,j=7;i<8;j=i++){var a=OCT[i],b=OCT[j];if(((a[1]>z)!==(b[1]>z))&&(x<(b[0]-a[0])*(z-a[1])/(b[1]-a[1])+a[0]))c=!c;}return c;}
+function riverZ(x){return -30+x*.3+6*Math.sin(x/16);}
+function inBay(x,z){return x*.55+z>78;}
+function water(x,z,pad){pad=pad||0;return Math.abs(z-riverZ(x))<4+pad||inBay(x-pad,z-pad);}
+function scarAt(x,z){for(var i=0;i<SC.length;i++){if(Math.hypot(x-SC[i].x,z-SC[i].z)<SC[i].r)return SC[i];}return null;}
+function district(x,z){var b=0,bd=1e9;D.forEach(function(d,i){var dd=(d.x-x)*(d.x-x)+(d.z-z)*(d.z-z);if(dd<bd){bd=dd;b=i;}});return b;}
+
+// фасады с окнами
+function winTex(lit,cols,base,rows){var c=document.createElement("canvas");c.width=c.height=256;var g=c.getContext("2d");g.fillStyle=base;g.fillRect(0,0,256,256);
+  for(var r=0;r<16;r++)for(var k=0;k<16;k++){var on=RAND()<lit;g.fillStyle=on?cols[RAND()*cols.length|0]:"#181818";g.globalAlpha=on?rnd(.45,1):1;
+    if(rows)g.fillRect(k*16+1,r*16+5,15,6);else g.fillRect(k*16+5,r*16+4,6,8);}
+  g.globalAlpha=1;var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t;}
+var TEX={
+  warm:winTex(.30,["#ffffff","#d4d4d4","#d4d4d4",REDS],"#0e0e0e"),
+  corp:winTex(.6,["#ffffff","#ffffff","#e6e6e6","#ffffff"],"#141414",true),
+  dim:winTex(.07,["#bdbdbd",REDS],"#0b0b0b"),
+  hero:winTex(.8,["#ffffff","#ffffff"],"#151515",true)
+};
+var B={};function bucket(k){return B[k]||(B[k]={sp:[],su:[],sc:[],tp:[],tc:[]});}
+var SH=[1,.55,1,1,.8,.42]; // яркость граней: +x,-x,верх,низ,+z,-z
+function box(k,x,z,w,d,h,tilt,ry,y0){
+  var g=new THREE.BoxGeometry(w,h,d).toNonIndexed(),uv=g.attributes.uv;
+  for(var f=0;f<6;f++){if(f===2||f===3)continue;var su=(f<2?d:w)/12,sv=h/12;for(var v=f*6;v<f*6+6;v++)uv.setXY(v,uv.getX(v)*su,uv.getY(v)*sv);}
+  g.translate(0,h/2,0);if(tilt)g.rotateZ(tilt);if(ry)g.rotateY(ry);g.translate(x,y0||0,z);
+  var p=g.attributes.position.array,u=uv.array,bk=bucket(k);
+  for(f=0;f<6;f++){if(f===3)continue;var top=f===2,s=SH[f];
+    for(v=f*6;v<f*6+6;v++){if(top){bk.tp.push(p[v*3],p[v*3+1],p[v*3+2]);bk.tc.push(.075,.075,.075);}else{bk.sp.push(p[v*3],p[v*3+1],p[v*3+2]);bk.su.push(u[v*2],u[v*2+1]);bk.sc.push(s,s,s);}}}
+  g.dispose();}
+var reds=[],fires=[],cranes=[];
+
+// город по сетке кварталов; каждая 5-я линия — проспект
+var STEP=5.2,ROAD=5;
+for(var ix=-22;ix<=22;ix++)for(var iz=-15;iz<=15;iz++){
+  if(ix%ROAD===0||iz%ROAD===0)continue;
+  var cx=ix*STEP,cz=iz*STEP;if(!inside(cx,cz)||water(cx,cz,1.5))continue;
+  var sc=scarAt(cx,cz);if(sc){for(var q2=0;q2<3;q2++){var rh=rnd(.4,1.6);box("dim",cx+rnd(-2,2),cz+rnd(-2,2),rnd(.8,2),rnd(.8,2),rh,rnd(-.6,.6),rnd(0,3));}if(RAND()<.35)fires.push([cx+rnd(-1,1),1,cz+rnd(-1,1),rnd(0,6)]);continue;}
+  var di=district(cx,cz),dd=D[di],r=RAND();
+  var near=Math.hypot(cx-dd.x,cz-dd.z);
+  if(di===0){if(near<22&&r<.6){var h=rnd(24,44)*(1-near/40);box("corp",cx,cz,rnd(3,4.2),rnd(3,4.2),h);if(h>28)reds.push([cx,h+.6,cz]);}else box("dim",cx,cz,rnd(3.4,4.6),rnd(3.4,4.6),rnd(3,9));}
+  else if(di===1){box("warm",cx,cz,rnd(3.6,4.6),rnd(3.6,4.6),rnd(5,11));}
+  else if(di===2){if(r<.25)continue;var near2=Math.hypot(cx-D[2].x,cz-D[2].z);if(near2<12)box("corp",cx,cz,rnd(4,4.8),rnd(3.6,4.8),rnd(12,22));else box("dim",cx,cz,rnd(4,4.8),rnd(3.6,4.8),rnd(3,7));}
+  else if(di===3){if(r<.35){for(var c=0;c<4;c++)box("cont",cx+rnd(-1.6,1.6),cz+rnd(-1.6,1.6),1.1,2.6,rnd(1,2.6),0,RAND()<.5?0:Math.PI/2);}else box("dim",cx,cz,rnd(4,4.8),rnd(3,4.6),rnd(2,4.5));}
+  else if(di===4){for(var q=0;q<2;q++)box("warm",cx+rnd(-1.2,1.2),cz+(q?1.3:-1.3),rnd(1.6,2.4),rnd(1.6,2.2),rnd(2,6));}
+  else if(di===5){box("warm",cx,cz,r<.5?4.6:1.8,r<.5?1.8:4.6,rnd(9,19));}
+  else if(di===6){if(r<.22){var hh=rnd(1.5,4);box("dim",cx,cz,rnd(3,4.4),rnd(3,4.4),hh,rnd(-.25,.25));if(RAND()<.6)fires.push([cx+rnd(-1,1),hh+.8,cz+rnd(-1,1),rnd(0,6)]);}
+    else if(r<.3){fires.push([cx,.6,cz,rnd(0,6)]);}else box("dim",cx,cz,rnd(2.6,4.4),rnd(2.6,4.4),rnd(1.5,6));}
+  else if(di===7){box("warm",cx,cz,rnd(3,4.4),rnd(3,4.4),rnd(5,13));}
+}
+// особые здания
+box("hero",D[7].x,D[7].z,4,4,56);box("hero",D[7].x,D[7].z,2.4,2.4,64);reds.push([D[7].x,65,D[7].z]);
+box("warm",D[1].x,D[1].z,13,9,10);box("warm",D[1].x,D[1].z,4,4,28);
+[[58,36],[70,24],[76,40]].forEach(function(c){box("crane",c[0],c[1],.7,.7,16);box("crane",c[0]+4,c[1],9,.6,.6,0,0);cranes.push(c);});
+
+function mesh(k,mat){var b=B[k];if(!b)return;
+  var g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(b.sp,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(b.su,2));g.setAttribute("color",new THREE.Float32BufferAttribute(b.sc,3));
+  scene.add(new THREE.Mesh(g,mat));
+  var t=new THREE.BufferGeometry();t.setAttribute("position",new THREE.Float32BufferAttribute(b.tp,3));t.setAttribute("color",new THREE.Float32BufferAttribute(b.tc,3));
+  scene.add(new THREE.Mesh(t,new THREE.MeshBasicMaterial({vertexColors:true})));}
+["warm","corp","dim","hero"].forEach(function(k){mesh(k,new THREE.MeshBasicMaterial({map:TEX[k],vertexColors:true}));});
+// контейнеры и краны: без окон, цвет через вершины
+(function(){var b=B.cont;if(b){for(var i=0;i<b.sc.length;i+=18){var col=[[.7,.02,0],[.55,.55,.55],[.3,.3,.3],[.18,.18,.18]][RAND()*4|0];for(var j=0;j<18;j+=3){var s=b.sc[i+j];b.sc[i+j]=col[0]*s;b.sc[i+j+1]=col[1]*s;b.sc[i+j+2]=col[2]*s;}}}
+  var c=B.crane;if(c)for(var i2=0;i2<c.sc.length;i2++)c.sc[i2]*=.28;})();
+mesh("cont",new THREE.MeshBasicMaterial({vertexColors:true}));mesh("crane",new THREE.MeshBasicMaterial({vertexColors:true}));
+
+// ---- платформы убраны ----
+function plat(x,z,r,y,col){var g=new THREE.CylinderGeometry(r,r*.94,1.6,8,1,false);var m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:col}));m.position.set(x,y,z);m.rotation.y=Math.PI/8;scene.add(m);
+  var e=new THREE.LineSegments(new THREE.EdgesGeometry(g),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.8}));e.position.copy(m.position);e.rotation.y=Math.PI/8;scene.add(e);
+  var u=[];for(var i=0;i<26;i++){var a=RAND()*6.28,rr=RAND()*r*.9;u.push(x+Math.cos(a)*rr,y-1,z+Math.sin(a)*rr);}return u;}
+var under=[];
+
+// кратеры от боёв
+SC.forEach(function(s){var c=new THREE.Mesh(new THREE.CircleGeometry(s.r,28),new THREE.MeshBasicMaterial({color:0x050505}));c.rotation.x=-Math.PI/2;c.position.set(s.x,.16,s.z);scene.add(c);
+  var ring=[];for(var i=0;i<40;i++){var a=i/40*6.283,b=(i+1)/40*6.283;ring.push(s.x+Math.cos(a)*s.r,.2,s.z+Math.sin(a)*s.r,s.x+Math.cos(b)*s.r,.2,s.z+Math.sin(b)*s.r);}
+  var g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(ring,3));scene.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:RED,transparent:true,opacity:.9})));});
+// смог над городом
+function smogTex(){var c=document.createElement("canvas");c.width=c.height=256;var g=c.getContext("2d");for(var i=0;i<60;i++){var x=RAND()*256,y=RAND()*256,r=20+RAND()*60,gr=g.createRadialGradient(x,y,0,x,y,r);
+  gr.addColorStop(0,"rgba(255,255,255,.35)");gr.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=gr;g.fillRect(0,0,256,256);}var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,1.5);return t;}
+var smog=[];[[7,.30],[13,.2],[19,.12]].forEach(function(s,i){var m=new THREE.Mesh(new THREE.PlaneGeometry(260,180),new THREE.MeshBasicMaterial({color:0x5a5a5a,map:smogTex(),transparent:true,opacity:s[1],depthWrite:false}));
+  m.rotation.x=-Math.PI/2;m.position.y=s[0];m.renderOrder=2+i;scene.add(m);smog.push(m);});
+
+// земля, вода, границы, проспекты
+var ground=new THREE.Mesh(new THREE.PlaneGeometry(900,900),new THREE.MeshBasicMaterial({color:0x0b0b0b}));ground.rotation.x=-Math.PI/2;ground.position.y=-.05;scene.add(ground);
+var octShape=new THREE.Shape(OCT.map(function(p){return new THREE.Vector2(p[0],-p[1]);}));
+var land=new THREE.Mesh(new THREE.ShapeGeometry(octShape),new THREE.MeshBasicMaterial({color:0x111111}));land.rotation.x=-Math.PI/2;land.position.y=0;scene.add(land);
+var bay=new THREE.Shape([new THREE.Vector2(10,-72.5),new THREE.Vector2(300,-(78-.55*300)),new THREE.Vector2(300,-300),new THREE.Vector2(10,-300)]);
+var bm=new THREE.Mesh(new THREE.ShapeGeometry(bay),new THREE.MeshBasicMaterial({color:0x060708}));bm.rotation.x=-Math.PI/2;bm.position.y=.03;scene.add(bm);
+var rp=[],rv=[];for(var x=-200;x<=200;x+=2){var zz=riverZ(x);rp.push(x,.04,zz-4,x,.04,zz+4);}
+for(var s=0;s<rp.length/6-1;s++){var a0=s*2,a1=s*2+1,b0=s*2+2,b1=s*2+3;rv.push(a0,b0,a1,a1,b0,b1);}
+var rg=new THREE.BufferGeometry();rg.setAttribute("position",new THREE.Float32BufferAttribute(rp,3));rg.setIndex(rv);scene.add(new THREE.Mesh(rg,new THREE.MeshBasicMaterial({color:0x060708,side:THREE.DoubleSide})));
+function line(pts,col,op){var g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pts,3));var m=new THREE.LineBasicMaterial({color:col,transparent:true,opacity:op});var l=new THREE.LineSegments(g,m);scene.add(l);return l;}
+var bank=[];for(x=-200;x<200;x+=2){[-4,4].forEach(function(o){bank.push(x,.08,riverZ(x)+o,x+2,.08,riverZ(x+2)+o);});}line(bank,0xffffff,.18);
+var bb=[];for(x=-80;x<300;x+=3){var z1=78-.55*x,z2=78-.55*(x+3);bb.push(x,.08,z1,x+3,.08,z2);}line(bb,0xffffff,.18);
+var ol=[];OCT.forEach(function(p,i){var q=OCT[(i+1)%8];ol.push(p[0],.12,p[1],q[0],.12,q[1]);});line(ol,RED,.85);
+var av=[],art=[];
+for(ix=-22;ix<=22;ix+=ROAD)for(iz=-15;iz<15;iz++){var x0=ix*STEP,za=iz*STEP,zb=(iz+1)*STEP;if(inside(x0,za)&&inside(x0,zb)&&(!water(x0,za)||!water(x0,zb)))(ix%10===0?art:av).push(x0,.1,za,x0,.1,zb);}
+for(iz=-15;iz<=15;iz+=ROAD)for(ix=-22;ix<22;ix++){var z0=iz*STEP,xa=ix*STEP,xb=(ix+1)*STEP;if(inside(xa,z0)&&inside(xb,z0)&&!water(xa,z0)&&!water(xb,z0))(iz===0?art:av).push(xa,.1,z0,xb,.1,z0);}
+line(av,0xffffff,.12);line(art,0xffffff,.32);
+// мосты на проспектах
+for(ix=-20;ix<=20;ix+=ROAD){var bx=ix*STEP,bz=riverZ(bx);if(inside(bx,bz)){var br=new THREE.Mesh(new THREE.BoxGeometry(1.8,.5,11),new THREE.MeshBasicMaterial({color:0x2a2a2a}));br.position.set(bx,.3,bz);scene.add(br);}}
+
+// огни: точки со свечением
+function glowTex(){var c=document.createElement("canvas");c.width=c.height=64;var g=c.getContext("2d"),gr=g.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(.25,"rgba(255,255,255,.6)");gr.addColorStop(1,"rgba(255,255,255,0)");g.fillStyle=gr;g.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);}
+var GT=glowTex();
+function pts(arr,col,size){var g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(arr,3));var m=new THREE.PointsMaterial({color:col,size:size,map:GT,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending});var p=new THREE.Points(g,m);scene.add(p);return p;}
+var redP=pts([].concat.apply([],reds),RED,3.2);
+
+
+var fireP=pts([].concat.apply([],fires.map(function(f){return [f[0],f[1],f[2]];})),0xff3a10,5);
+var fireGlow=pts([].concat.apply([],fires.map(function(f){return [f[0],f[1]+1,f[2]];})),RED,14);fireGlow.material.opacity=.35;
+// машины на главных проспектах
+var cars=[];for(i=0;i<70;i++){var horiz=RAND()<.5;cars.push({h:horiz,lane:horiz?0:(RAND()<.5?-10:10)*STEP/1,pos:rnd(-110,110),v:rnd(8,16)*(RAND()<.5?-1:1)});}
+var carG=new THREE.BufferGeometry();carG.setAttribute("position",new THREE.Float32BufferAttribute(new Float32Array(cars.length*3),3));
+var carP=new THREE.Points(carG,new THREE.PointsMaterial({color:0xffffff,size:1.6,map:GT,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));scene.add(carP);
+function placeCars(dt){var a=carG.attributes.position;cars.forEach(function(c,i){c.pos+=c.v*dt;if(c.pos>115)c.pos=-115;if(c.pos<-115)c.pos=115;
+  var x=c.h?c.pos:c.lane,z=c.h?c.lane+(c.v>0?.8:-.8):c.pos;var ok=inside(x,z)&&(!c.h||!water(x,z));a.setXYZ(i,ok?x+(c.h?0:(c.v>0?.8:-.8)):9999,ok?.5:-99,ok?z:9999);});a.needsUpdate=true;}
+// луч над Башней героев и прожекторы мэрии
+function cone(r,h,col,op){var g=new THREE.CylinderGeometry(.2,r,h,24,1,true);g.translate(0,h/2,0);return new THREE.Mesh(g,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide}));}
+
+var lamps=[];
+
+// камера: вид навигатора, вращение мышкой/пальцем по горизонтали
+var yaw=-.55,yawT=yaw,tgt=new THREE.Vector3(0,0,0),dist=200,distT=200,base=200,W=1,H=1;
+function size(){var r=city.getBoundingClientRect();W=r.width;H=r.height;renderer.setSize(W,H,false);cam.aspect=W/H;var sh=W>=901?Math.min(220,W*.17):0;if(sh)cam.setViewOffset(W,H,-sh,0,W,H);else cam.clearViewOffset();cam.updateProjectionMatrix();
+  base=215*Math.pow(Math.max(1,1.55/cam.aspect),.8);kick();}
+var dragX=null,moved=0;
+city.addEventListener("pointerdown",function(e){if(e.target.closest(".cm-pin,.cm-compass"))return;dragX=e.clientX;moved=0;city.classList.add("drag");});
+L("pointermove",function(e){if(dragX===null)return;var dx=e.clientX-dragX;dragX=e.clientX;moved+=Math.abs(dx);yawT-=dx*.006;ST.userT=performance.now();kick();});
+L("pointerup",function(){dragX=null;city.classList.remove("drag");});
+L("pointercancel",function(){dragX=null;city.classList.remove("drag");});
+var v3=new THREE.Vector3(),needle=needle,last=0,run=false,t=0;
+function frame(ts){
+  if(dead||!canvas.isConnected){dispose();return;}
+  var dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;t+=dt;
+  var vis=city.getBoundingClientRect();if(vis.bottom<0||vis.top>innerHeight){run=false;last=0;return;}
+  if(!calm&&ts-ST.userT>5000)yawT+=dt*.035;
+  var d=ST.sel.s?SC[ST.sel.i]:D[ST.sel.i],ft=ST.focus?new THREE.Vector3(d.x,ST.sel.s?0:(d.k==="corp"?16:ST.sel.i===7?24:0),d.z):new THREE.Vector3(6,8,4);
+  distT=(ST.focus?base*(ST.sel.s?.32:.45):base)/ST.zoomT;
+  var k=calm?1:1-Math.pow(.02,dt);yaw+=(yawT-yaw)*k;dist+=(distT-dist)*k;tgt.lerp(ft,k);
+  var pol=(ST.focus?.78:.72)-(cam.aspect<1?.12:0);scene.fog.near=dist*.75;scene.fog.far=dist*2.4;
+  cam.position.set(tgt.x+Math.sin(yaw)*Math.sin(pol)*dist,Math.cos(pol)*dist,tgt.z+Math.cos(yaw)*Math.sin(pol)*dist);cam.lookAt(tgt);
+  needle.style.transform="rotate("+(yaw*180/Math.PI)+"deg)";
+  redP.material.opacity=calm?1:(Math.sin(t*3)>0?1:.25);
+  fireP.material.size=4.4+Math.sin(t*9)*.9+Math.sin(t*23)*.5;fireGlow.material.opacity=.28+Math.sin(t*5)*.08;
+  lamps.forEach(function(l){l[0].rotation.z=Math.sin(t*.35+l[1])*.55;l[0].rotation.x=Math.cos(t*.27+l[1])*.4;});
+  placeCars(calm?0:dt);
+  smog.forEach(function(m,i){m.material.map.offset.x=t*(.004+i*.003);m.material.map.offset.y=t*.002*(i%2?1:-1);});
+  renderer.render(scene,cam);
+  function place(el,x,y,z){v3.set(x,y,z).project(cam);var off=v3.z>1||Math.abs(v3.x)>1.1||Math.abs(v3.y)>1.1;
+    el.style.transform="translate("+((v3.x+1)/2*W)+"px,"+((1-v3.y)/2*H)+"px) translate(-13px,-50%)";el.style.visibility=off?"hidden":"visible";}
+  D.forEach(function(d,i){place(pins[i],d.x,d.y,d.z);});SC.forEach(function(s,i){place(spins[i],s.x,4,s.z);});
+  if(calm&&Math.abs(yawT-yaw)<.001&&Math.abs(distT-dist)<.05){run=false;return;}
+  requestAnimationFrame(frame);
+}
+kick=function(){if(!run){run=true;requestAnimationFrame(frame);}};
+L("scroll",function(){kick();},{passive:true});addEventListener("resize",size);
+size();kick();
+var pts={},pd=0;
+city.addEventListener("pointerdown",function(e){pts[e.pointerId]=[e.clientX,e.clientY];var k=Object.keys(pts);if(k.length===2){dragX=null;city.classList.remove("drag");var a=pts[k[0]],b=pts[k[1]];pd=Math.hypot(a[0]-b[0],a[1]-b[1]);}});
+L("pointermove",function(e){if(!pts[e.pointerId])return;pts[e.pointerId]=[e.clientX,e.clientY];var k=Object.keys(pts);if(k.length===2){dragX=null;var a=pts[k[0]],b=pts[k[1]],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd>0&&d>0)zoomBy(d/pd);pd=d;}});
+function pend(e){delete pts[e.pointerId];pd=0;}
+L("pointerup",pend);L("pointercancel",pend);
+function zoomBy(f){ST.zoomT=Math.max(.65,Math.min(2.6,ST.zoomT*f));ST.userT=performance.now();kick();}
+city.addEventListener("wheel",function(e){if(!(e.ctrlKey||e.metaKey))return;e.preventDefault();zoomBy(Math.exp(-e.deltaY*.01));},{passive:false});
+function dispose(){
+  if(dead)return;dead=true;off.forEach(function(f){f();});
+  try{scene.traverse(function(o){if(o.geometry)o.geometry.dispose();if(o.material)[].concat(o.material).forEach(function(m){if(m.map)m.map.dispose();m.dispose();});});renderer.dispose();if(renderer.forceContextLoss)renderer.forceContextLoss();}catch(e){}
+}
+return {kick:function(){kick();},zoom:zoomBy,dispose:dispose};
+}
+function cmPin(cls, label, kind, name, fn){
+  const b = h("button", {class: "cm-pin " + cls + " " + kind, type: "button", "aria-label": name, onclick: e => { e.stopPropagation(); fn(); }},
+    h("span", {class: "o"}, h("span", {}, String(label))), h("span", {class: "l"}, name));
+  return b;
+}
+function viewMap(){
+  const M = C.cityMap, D = M.districts, SC = M.incidents;
+  const canvas = h("canvas", {}), pinsEl = h("div", {class: "cm-pins"}), needle = h("i", {});
+  const msg = h("div", {class: "cm-msg"}, "Загружаем карту…");
+  const ST = {sel: cmSel, focus: cmFocus, userT: 0, zoomT: 1};
+  let ctl = null;
+  const pins = D.map((d, i) => cmPin("", i + 1, CM_POS.d[i].k, d.n, () => toggle(0, i)));
+  const spins = SC.map((d, i) => cmPin("scar", "×", "", d.n, () => toggle(1, i)));
+  pins.concat(spins).forEach(p => pinsEl.append(p));
+  const body = h("div", {class: "cm-body"});
+  const syncPins = () => { pins.forEach((p, i) => { p.querySelector(".l").textContent = D[i].n; p.setAttribute("aria-label", D[i].n); }); spins.forEach((p, i) => { p.querySelector(".l").textContent = SC[i].n; p.setAttribute("aria-label", SC[i].n); }); };
+  const mark = () => { pins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 0 && k === cmSel.i)); spins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 1 && k === cmSel.i)); };
+  function paint(){
+    const scar = cmSel.s === 1, d = scar ? SC[cmSel.i] : D[cmSel.i], k = scar ? "hot" : CM_POS.d[cmSel.i].k;
+    body.replaceChildren(
+      h("span", {class: "cm-no"}, scar ? "Инцидент" : "Район " + pad(cmSel.i + 1) + " / " + pad(D.length)),
+      ed("h3", {}, () => d.n, v => d.n = v, {ph: "Название", after: syncPins}),
+      ed("span", {class: "cm-tag " + k}, () => d.t, v => d.t = v, {ph: "Подпись"}),
+      ed("p", {}, () => d.d, v => d.d = v, {multi: true, ph: "Описание"}));
+    mark();
+  }
+  function pick(s, i){
+    if (s === 0) i = (i + D.length) % D.length;
+    cmSel = {s, i}; cmFocus = true; ST.sel = cmSel; ST.focus = true; ST.zoomT = 1; ST.userT = performance.now();
+    paint(); if (ctl) ctl.kick();
+  }
+  function showAll(){ cmFocus = false; ST.focus = false; ST.zoomT = 1; ST.userT = performance.now(); if (ctl) ctl.kick(); }
+  /* повторное нажатие на уже выбранный объект возвращает общий вид города */
+  function toggle(s, i){ if (cmFocus && cmSel.s === s && cmSel.i === i) showAll(); else pick(s, i); }
+  const nav = h("div", {class: "cm-nav"},
+    h("button", {type: "button", "aria-label": "Предыдущий район", onclick: () => pick(0, cmSel.s ? 0 : cmSel.i - 1)}, "←"),
+    h("button", {type: "button", "aria-label": "Следующий район", onclick: () => pick(0, cmSel.s ? 0 : cmSel.i + 1)}, "→"),
+    h("button", {type: "button", class: "all", onclick: showAll}, "Весь город"));
+  const stage = h("div", {class: "cm-stage"}, canvas, pinsEl, h("div", {class: "cm-compass", "aria-hidden": "true"}, needle),
+    h("div", {class: "cm-zoom"}, h("button", {type: "button", "aria-label": "Приблизить", onclick: () => ctl && ctl.zoom(1.35)}, "+"), h("button", {type: "button", "aria-label": "Отдалить", onclick: () => ctl && ctl.zoom(1 / 1.35)}, "−")), msg, h("span", {class: "cm-hint"}, "Тяните: повернуть · Ctrl + колесо: приблизить"));
+  paint();
+  const root = h("div", {}, pageHead(C.pages.map), h("div", {class: "cm"}, stage, h("div", {class: "cm-card"}, body, nav)),
+    h("p", {class: "cm-legend"}, "Восьмиугольники: районы города. Красные квадраты: места боёв. Красным выделены корпорации и зоны бедствия."));
+  loadThree().then(T => {
+    if (!stage.isConnected) return;
+    if (cmCtl) cmCtl.dispose();
+    ctl = cmCtl = mountCityMap(T, stage, canvas, needle, pins, spins, ST);
+    msg.hidden = true;
+  }).catch(() => { msg.textContent = "Карта не открылась: нужен интернет и браузер с 3D (WebGL)."; pinsEl.hidden = true; });
+  return root;
+}
+
 /* ---------- Навигация (подвкладки) ---------- */
 let navSub = "plot", inNav = false;
-const SUBS = [["plot", "Сюжет", viewPlot], ["world", "Информация о мире", viewWorld]];
+const SUBS = [["plot", "Сюжет", viewPlot], ["world", "Информация о мире", viewWorld], ["map", "Карта города", viewMap]];
 const idxById = (arr, id) => { let i = arr.findIndex(x => x.id === id); if (i < 0 && /^\d+$/.test(id)) i = +id - 1; return i >= 0 && i < arr.length ? i : -1; };
 const resolve = id => {
   id = id || ""; let m;
@@ -4058,6 +4371,7 @@ function buildIndex(){
   add("plot", C.pages.nav.title + " · " + C.pages.plot.title, C.pages.plot.title, C.plotText);
   C.plot.forEach(p => out.push({tab: "plot", label: C.pages.nav.title + " · " + C.pages.plot.title, title: p.title || p.kind || "Запись", text: [p.kind, p.text, plain(p.head), plain(p.body), plain(p.long)].join(" "), target: "plot"}));
   C.world.forEach(x => out.push({tab: "world", label: C.pages.nav.title + " · " + C.pages.world.title, title: x.title, text: [x.text, x.body, x.body2].join(" "), target: "world/" + idOf(x)}));
+  C.cityMap.districts.concat(C.cityMap.incidents).forEach(x => out.push({tab: "map", label: C.pages.nav.title + " · " + C.pages.map.title, title: x.n, text: [x.t, x.d].join(" "), target: "map"}));
   C.teams.forEach(t => { out.push({tab: "characters", label: "Персонажи", title: t.name, text: t.about, target: "team/" + idOf(t)}); t.chars.forEach(c => out.push({tab: "characters", label: "Персонажи · " + t.name, title: c.name + (c.alias ? " · " + c.alias : ""), text: [c.alias, c.age, c.power, c.desc, c.player, c.story, c.story2].join(" "), target: "char/" + idOf(c)})); });
   C.rules.forEach(r => add("rules", "Правила", r.title, r.text));
   const SECN = {occ: "Занятые персонажи", ban: "Запрещённые внешности", job: "Биржа труда", act: "Проверка активности"};
@@ -4065,7 +4379,7 @@ function buildIndex(){
   C.faq.forEach(f => add("faq", "FAQ", f.q, f.a));
   C.roulette.items.forEach(it => out.push({tab: "tech", label: "Радар · Рандомайзер", title: it.name || "Способность", text: it.desc, target: "tech/roulette"}));
   out.push({tab: "tech", label: "Радар", title: C.pages.stats.title, text: C.stats.names.join(" "), target: "tech/stats"});
-  ["nav", "plot", "world", "characters", "rules", "tech", "faq"].forEach(id => add(id, C.pages[id].title, C.pages[id].title, C.pages[id].lead));
+  ["nav", "plot", "world", "map", "characters", "rules", "tech", "faq"].forEach(id => add(id, C.pages[id].title, C.pages[id].title, C.pages[id].lead));
   return out.map(r => Object.assign(r, {title: plain(r.title), text: plain(r.text)}));
 }
 let searchEl = null;
@@ -4283,7 +4597,7 @@ function openFootnote(root, sup){
 /* ссылка: окно выбора страницы или внешнего адреса */
 function linkTargets(){
   const out = [], add = (group, label, target) => out.push({group, label, target});
-  [["home", "Главная"], ["plot", "Сюжет"], ["world", "Информация о мире"], ["characters", "Персонажи"], ["rules", "Правила"], ["tech", "Радар"], ["busy", "Занятые персонажи"], ["faq", "FAQ"]]
+  [["home", "Главная"], ["plot", "Сюжет"], ["world", "Информация о мире"], ["map", "Карта города"], ["characters", "Персонажи"], ["rules", "Правила"], ["tech", "Радар"], ["busy", "Занятые персонажи"], ["faq", "FAQ"]]
     .forEach(([id, l]) => add("Раздел", (C.pages[id] && C.pages[id].title) || l, id));
   C.world.forEach(x => add("Информация о мире", x.title || "Без названия", "world/" + idOf(x)));
   C.teams.forEach(t => { add("Команда", t.name || "Команда", "team/" + idOf(t)); t.chars.forEach(c => add("Персонаж · " + (t.name || ""), c.name || "Без имени", "char/" + idOf(c))); });
