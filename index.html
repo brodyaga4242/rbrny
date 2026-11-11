@@ -467,43 +467,99 @@ html.no-pieces .hero-in::after{display:none}
 @media (max-width:720px){.hero-in::after{right:-10px;top:-24px;width:96px;transform:rotate(5deg)}}
 .plot h2{margin:0 0 36px;font-size:clamp(34px,5.4vw,72px)}
 .plot-text{max-width:72ch;font:300 clamp(17px,1.6vw,20px)/1.85 var(--body);white-space:pre-line}
-/* лента сюжета */
-.pf{position:relative;margin-top:44px;padding-bottom:20px}
-.pf-line{position:absolute;left:11px;top:0;bottom:0;width:2px;background:var(--line)}
-.pf-line::after{content:"";position:absolute;inset:0;background:var(--yel);transform:scaleY(var(--p,0));transform-origin:top}
-.pf-item{position:relative;padding:0 0 56px 44px;display:grid;gap:22px;min-width:0}
-.pf-item::before{content:"";position:absolute;left:5px;top:8px;width:14px;height:14px;border-radius:50%;background:var(--bg,#fff);border:2px solid var(--line);transition:background .4s,border-color .4s}
-.pf-item.seen::before{background:var(--yel);border-color:var(--yel)}
-.pf-meta{display:grid;gap:8px;align-content:start;min-width:0}
-.pf-no{font:400 12px var(--body);letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
-.pf-kind{display:inline-block;font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--line);padding:3px 8px;width:max-content;max-width:100%}
-.pf-meta h3{margin:0;font-size:clamp(24px,3.2vw,38px)}
-.pf-text{max-width:46ch;font:300 clamp(16px,1.4vw,18px)/1.75 var(--body);white-space:pre-line}
-.pf-src{min-width:0}
-.pf-src img{display:block;width:100%;max-width:520px;height:auto;margin-inline:auto}
-.pf-ph{border:1px dashed var(--line);padding:40px 16px;text-align:center;color:var(--muted);font-size:14px}
-.pf-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
-.pf-tools select{font:inherit;font-size:14px;max-width:100%}
-.pf-item>*{transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
-.pf-item .pf-src{transition:none}
-.pf-item.mo .pf-meta.pre{opacity:0;transform:translateY(24px)}
-.pf-item.mo .pf-src.pre-rise{opacity:0;transform:translateY(40px)}
-.pf-item.mo .pf-src.pre-fade{opacity:0}
-.pf-item.mo .pf-src.pre-slide{opacity:0;transform:translateX(60px)}
-.pf-item.mo .pf-src.pre-drop,.pf-item.mo .pf-src.pre-tv{opacity:0}
-.pf-src.go-rise,.pf-src.go-fade,.pf-src.go-slide{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1)}
-.pf-src.go-drop{animation:pfDrop .85s cubic-bezier(.2,.8,.2,1)}
-.pf-src.go-tv{animation:pfTv .7s cubic-bezier(.3,.9,.3,1)}
-@keyframes pfDrop{from{opacity:0;transform:translateY(-44px) rotate(-5deg)}}
-@keyframes pfTv{0%{opacity:0;transform:scale(1,.02)}60%{opacity:1;transform:scale(1,.06)}100%{transform:scale(1,1)}}
-@media (min-width:860px){
-  .pf-line{left:50%;margin-left:-1px}
-  .pf-item{padding-left:0;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
-  .pf-item::before{left:50%;margin-left:-7px;top:50%}
-  .pf-item:nth-child(odd) .pf-meta{order:2}
-  .pf-item:nth-child(even) .pf-meta{text-align:right;justify-items:end}
-  .pf-item:nth-child(even) .pf-text{margin-left:auto}
-}
+/* сюжет: ползунок лет */
+.pl-scrub{margin-top:30px;min-width:0}
+.plot{min-width:0}
+.pl-read{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:14px}
+.pl-read b{font:300 clamp(34px,6vw,60px)/1 var(--display);text-transform:uppercase}
+.pl-era{font:500 12px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-text)}
+.pl-trk{position:relative;height:112px;border-bottom:3px solid var(--ink);touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:ew-resize}
+.pl-bands{position:absolute;inset:0}
+.pl-band{position:absolute;top:0;bottom:0}
+.pl-band.b0{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.pl-band.b1{background:color-mix(in srgb,var(--ink) 14%,transparent)}
+.pl-lab{position:absolute;top:6px;overflow:hidden;box-sizing:border-box;padding:0 6px;font:600 10px/1.2 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);pointer-events:none;overflow-wrap:anywhere}
+.pl-lab.r2{top:var(--r2,36px);padding:0 4px;white-space:nowrap}
+.pl-tk{position:absolute;width:14px;height:14px;margin-left:-7px;padding:0;border-radius:50%;border:2px solid var(--bg);cursor:pointer;transition:transform .2s}
+.pl-tk::after{content:"";position:absolute;inset:-8px}
+.pl-tk.on{transform:scale(1.5);outline:2px solid var(--ink)}
+.pl-hnd{position:absolute;top:var(--lz,54px);bottom:-3px;width:4px;margin-left:-2px;background:var(--gold);cursor:grab;transition:left .35s cubic-bezier(.3,.8,.3,1);z-index:2}
+.pl-hnd::after{content:"";position:absolute;left:-9px;bottom:-9px;width:22px;height:22px;box-sizing:border-box;border-radius:50%;background:var(--gold);border:3px solid var(--bg)}
+.pl-trk.drag .pl-hnd{transition:none;cursor:grabbing}
+.pl-hnd:focus-visible,.pl-btn:focus-visible,.pl-tk:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.pl-axis{display:flex;justify-content:space-between;margin-top:10px;font:400 11px var(--mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.pl-ctl{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+.pl-n{font:400 13px var(--mono);color:var(--muted)}
+.pl-btn{padding:9px 14px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 14px/1.3 var(--body);white-space:nowrap;cursor:pointer}
+.pl-btn.pri{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.pl-btn:disabled{opacity:.35;cursor:default}
+.pl-eraintro{margin-top:22px;display:grid;gap:8px}
+.pl-intro{max-width:70ch;color:var(--muted);font-size:15px;line-height:1.7}
+.pl-eraname{font:600 12px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-text)}
+.pl-rdr{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:12px;margin-top:22px;padding:clamp(18px,3.5vw,40px);background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--vc);animation:plIn .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes plIn{from{opacity:0;transform:translateY(16px)}}
+.pl-no{font:400 11px/1.5 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pl-no em{font-style:normal;font-weight:600;color:var(--vc)}
+.pl-rdr h3{margin:0;font-size:clamp(26px,4vw,44px)}
+.pl-lead{margin:0;max-width:62ch;color:var(--muted);font-size:17px;line-height:1.6}
+.pl-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:26px;margin-top:8px}
+@media (min-width:900px){.pl-grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:56px}}
+.pl-aside{display:grid;gap:12px;align-content:start;min-width:0}
+.pl-text{min-width:0;max-width:64ch;overflow-wrap:anywhere;font:300 clamp(17px,1.5vw,19px)/1.85 var(--body)}
+.pl-nav{display:flex;justify-content:space-between;gap:10px;margin-top:26px;padding-top:16px;border-top:1px solid var(--line)}
+.pl-nav .pl-btn{min-width:0;max-width:48%;overflow:hidden;text-overflow:ellipsis}
+.pl-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:16px;font-size:13px;color:var(--muted)}
+.pl-legend i{display:inline-block;width:10px;height:10px;margin-right:6px;border-radius:50%}
+.pl-edit{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px;font-size:12px}
+.pl-edit label{display:grid;gap:2px;color:var(--muted)}
+.pl-edit select,.pl-edit input{max-width:100%;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
+.pl-edit input{width:90px}
+@media (max-width:560px){.pl-btn{padding:9px 11px;font-size:13px}.pl-lab{padding:0 3px;font-size:9px;letter-spacing:.02em;overflow-wrap:normal}}
+/* документы-заглушки, пока нет картинки источника */
+.pd{position:relative;width:100%;max-width:440px;margin-inline:auto;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.pd-img img{display:block;width:100%;height:auto}
+.pd-paper{padding:16px 18px 20px;background:#e9e2cf;color:#23201a}
+.pd-mast{display:flex;justify-content:space-between;gap:8px;padding-bottom:6px;border-bottom:2px solid #23201a;font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase}
+.pd-mast b{font-size:16px}
+.pd-paper h4{margin:10px 0 8px;font:600 clamp(20px,3vw,26px)/1.1 var(--body);text-transform:uppercase}
+.pd-cols{columns:2;column-gap:14px;font:400 12.5px/1.5 Georgia,serif;text-align:justify}
+.pd-radio{padding:16px;background:#1b1d33;color:#dfe3ff;border:1px solid var(--line)}
+.pd-dial{display:flex;justify-content:space-between;gap:10px;font:400 12px var(--mono);letter-spacing:.08em;color:#f5ab00}
+.pd-wave{display:flex;align-items:center;gap:4px;height:48px;margin:12px 0}
+.pd-wave i{flex:1;height:100%;border-radius:2px;background:#f5ab00;transform:scaleY(.15);animation:plWv 1.1s ease-in-out infinite alternate}
+.pd-wave i:nth-child(3n){animation-delay:-.3s}.pd-wave i:nth-child(3n+1){animation-delay:-.7s}
+@keyframes plWv{to{transform:scaleY(1)}}
+.pd-rl{font-size:14px}
+.pd-tv{padding:11px;background:#1b1d33;color:#dfe3ff;border:1px solid var(--line)}
+.pd-scr{position:relative;overflow:hidden;display:grid;place-items:center;aspect-ratio:16/10;background:#05060f;color:#fff}
+.pd-scr::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px)}
+.pd-tag{position:absolute;top:9px;left:11px;font:400 10px var(--mono);letter-spacing:.1em;color:#ff6a5c}
+.pd-face{width:30%;aspect-ratio:1;border-radius:50% 50% 40% 40%;background:#2b3050}
+.pd-chy{position:absolute;left:0;bottom:12px;z-index:1;max-width:90%;padding:5px 11px;background:#f5ab00;color:#161003;font:600 13px/1.2 var(--body);text-transform:uppercase}
+.pd-cap{margin:9px 2px 0;font-size:13px}
+.pd-law{padding:18px 20px 22px;background:#f4f1e8;color:#23201a;border:1px solid #c9c2ac;outline:3px double #c9c2ac;outline-offset:-9px;font-family:Georgia,serif}
+.pd-lh{display:flex;justify-content:space-between;gap:10px;font:600 11px var(--body);letter-spacing:.14em;text-transform:uppercase}
+.pd-law .pd-lh{color:#6a5f45}
+.pd-law h4{margin:10px 0 8px;font:600 20px/1.15 var(--body);color:#23201a}
+.pd-law .pd-lb{padding-bottom:30px;font-size:13.5px;line-height:1.55}
+.pd-seal{position:absolute;right:16px;bottom:14px;display:grid;place-items:center;width:54px;height:54px;border:2px solid #b0342a;border-radius:50%;color:#b0342a;font:600 9px var(--body);letter-spacing:.1em;text-transform:uppercase;transform:rotate(-14deg);opacity:.85}
+.pd-lab{padding:16px;background-color:#0f1f1d;background-image:linear-gradient(#17332f 1px,transparent 1px),linear-gradient(90deg,#17332f 1px,transparent 1px);background-size:20px 20px;color:#bfeee3;border:1px solid #1f4a43;font-family:var(--mono)}
+.pd-lab .pd-lh{color:#7fe7cf;font-family:var(--mono);font-weight:400;letter-spacing:.08em}
+.pd-bars{display:flex;align-items:flex-end;gap:6px;height:60px;margin:12px 0}
+.pd-bars i{flex:1;height:var(--h);background:#7fe7cf;opacity:.85;transform-origin:bottom;animation:plGrow 1.2s cubic-bezier(.2,.8,.2,1) both}
+.pd-bars i:nth-child(2){animation-delay:.08s}.pd-bars i:nth-child(3){animation-delay:.16s}.pd-bars i:nth-child(4){animation-delay:.24s}.pd-bars i:nth-child(5){animation-delay:.32s}.pd-bars i:nth-child(6){animation-delay:.4s}.pd-bars i:nth-child(7){animation-delay:.48s}
+@keyframes plGrow{from{transform:scaleY(0)}}
+.pd-lab .pd-lb{font-size:12.5px;line-height:1.6}
+.pd-secret{overflow:hidden;padding:20px 18px 22px;background:#e9e2cf;color:#23201a}
+.pd-stamp{position:absolute;right:12px;top:12px;padding:1px 9px;border:2px solid #c43a2f;color:#c43a2f;font:600 15px var(--body);letter-spacing:.14em;text-transform:uppercase;transform:rotate(7deg);animation:plSlam .5s .2s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes plSlam{from{opacity:0;transform:scale(2.4) rotate(-12deg)}}
+.pd-secret .pd-lh{display:block;margin-bottom:10px;padding-right:96px;font-size:13px;letter-spacing:.06em}
+.pd-secret .pd-lb{font:400 13px/1.6 var(--mono)}
+.pd-redact{display:grid;gap:6px;margin-top:12px}
+.pd-redact i{height:11px;background:#15130f;transform-origin:left;animation:plWipe 1s .5s cubic-bezier(.2,.8,.2,1) both}
+.pd-redact i:nth-child(1){width:92%}.pd-redact i:nth-child(2){width:68%;animation-delay:.7s}.pd-redact i:nth-child(3){width:80%;animation-delay:.9s}
+@keyframes plWipe{from{transform:scaleX(0)}}
+.pd .rich p,.pd .rich div{margin:0 0 .6em}
 .wlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:28px}
 .wc{display:flex;flex-direction:column;border:1px solid var(--line);background:var(--panel);transition:background .2s}
 .wc:nth-child(4n+1){--c:var(--yel);--ci:var(--blk)}.wc:nth-child(4n+2){--c:var(--red);--ci:#fff}.wc:nth-child(4n+3){--c:var(--blue);--ci:#fff}.wc:nth-child(4n){--c:var(--cream);--ci:var(--blk)}
@@ -1222,10 +1278,8 @@ const DEFAULTS = /*DEFAULTS-START*/{
     story: "«Здесь можно поставить цитату или эпиграф к вашему сюжету.»\n\nвы открываете глаза. мир вокруг уже не тот, каким вы его помнили.\n\nопишите здесь завязку проекта в несколько абзацев: что случилось, кто эти люди и зачем они здесь."
   },
   plotText: "Вставьте сюда текст сюжета: с чего всё началось, что происходит сейчас и куда движется история. Абзацы разделяйте пустой строкой.",
-  plot: [
-    { id: "pl1", kind: "Радио", title: "Пример: утренний эфир", text: "Это пример записи. Загрузите сюда картинку вашего источника (газета, кадр ТВ, плашка радио) и замените текст или удалите запись.", img: "", anim: "rise" },
-    { id: "pl2", kind: "Газета", title: "Пример: вечерний выпуск", text: "Записи идут сверху вниз по порядку сюжета. Вид появления выбирается у каждой записи отдельно.", img: "", anim: "drop" }
-  ],
+  plot: [{"id": "pl1", "kind": "Радио", "title": "Магнитная буря, говорят они", "text": "Утренний эфир. Мир слышит о вспышке и пожимает плечами.", "img": "", "anim": "rise", "ago": 150, "view": "people", "form": "radio", "head": "Утренний эфир", "body": "Ведущий: «Если у вас сегодня сбоит приёмник, это не вы, это небо.»\nУчёный: «Ничего опасного для людей мы не видим.»", "long": "Утренний выпуск начался как обычно: прогноз погоды, пробки на мосту, шутка ведущего про кота. Около семи он сказал, что ночью небо над городом светилось. Слушатели писали в студию: у кого-то сбоили часы, у кого-то выбивало пробки.\n\nК девяти пригласили учёного. Он говорил ровно и долго про магнитную бурю, но ни слова про людей. Ведущий его об этом не спросил.\n\nПоследняя новость заняла сорок секунд: в городской больнице несколько женщин поступили с одинаковым жаром. Затем снова погода."}, {"id": "pl2", "kind": "Лаборатория", "title": "Журнал наблюдений обсерватории", "text": "Ночная запись приборов. Цифры не сходятся с версией о буре.", "img": "", "anim": "rise", "ago": 150, "view": "science", "form": "lab", "head": "Обсерватория №2 · журнал", "body": "Всплеск 03:12. Источник вне магнитосферы.\nСбой хронометров: 4 из 9.\nКомментарий дежурного: «Не буря».", "long": "Дежурный астроном записывал показания каждые десять минут. В 03:12 стрелки магнитометра ушли за пределы шкалы, но форма всплеска не похожа ни на одну известную бурю: слишком резкий фронт, слишком быстрый спад.\n\nУтром он положил журнал на стол начальнику. Начальник прочитал, закрыл и сказал, что для печати годится версия о магнитной буре. Копию страницы астроном оставил у себя."}, {"id": "pl3", "kind": "Записка", "title": "Служебная записка санитарного инспектора", "text": "Короткая заметка о больнице. Попала в закрытую папку.", "img": "", "anim": "rise", "ago": 149, "view": "closed", "form": "secret", "head": "Записка · санитарный инспектор", "body": "Больница №3, 14 пациенток, жар без причины.\nСовпадение сроков с «бурей» считаю неслучайным.\nПрошу не передавать в печать.", "long": "Инспектор приехал в больницу по обычной жалобе на сквозняки и остался на три часа. Он опросил дежурных сестёр и выяснил, что всем пациенткам сорок лет или меньше, все они в положении или недавно родили.\n\nВ записке он просит не передавать сведения в прессу до выяснения. Через неделю записка вернулась с резолюцией «в архив»."}, {"id": "pl4", "kind": "Лаборатория", "title": "Образцы крови пациенток, серия 1", "text": "Первый лабораторный отчёт. Находка есть, объяснения нет.", "img": "", "anim": "rise", "ago": 140, "view": "science", "form": "lab", "head": "Лаборатория №4 · отчёт", "body": "Образцы 1–14: изменённый белок.\nДоли совпадения: 0.97.\nВывод: требуется наблюдение потомства.", "long": "Во всех образцах найден один и тот же белок, которого нет в справочниках. Он не похож ни на вирусный, ни на токсин. Ничего подобного раньше не публиковали.\n\nЛаборант предложил назвать находку временным индексом, чтобы не спорить о происхождении. Заведующий согласился, но попросил не писать слово «геном» ни в заголовке, ни в выводах."}, {"id": "pl5", "kind": "Газета", "title": "Дети, которые не болеют", "text": "Заметка о странных малышах в одном квартале.", "img": "", "anim": "rise", "ago": 132, "view": "people", "form": "paper", "head": "Дети, которые не болеют", "body": "В доме на Мельничной семь семей, и ни один малыш не простудился за зиму. Соседи говорят, что это хороший воздух. Врач из районной поликлиники просил не писать лишнего.", "long": "Редакция получила письмо от жительницы Мельничной: её дочери полтора года, и она уже трижды сдвигала игрушку взглядом. Мы проверили адрес. Игрушка действительно стояла не там, где её оставили.\n\nМать просит не называть фамилию. Мы не называем. Врач из поликлиники сказал, что дети бывают разные, а читатели всё равно разные письма пишут."}, {"id": "pl6", "kind": "Закон", "title": "Постановление о карантине в больницах", "text": "Первый акт, который прямо не называет причин.", "img": "", "anim": "rise", "ago": 128, "view": "power", "form": "law", "head": "Постановление № 17", "body": "Ст. 1. Больницам вести учёт пациенток с повышенной температурой неясной этиологии.\nСт. 2. Сведения не разглашать.", "long": "Постановление подписано за один день и опубликовано без обсуждения. В первой статье речь идёт об учёте, во второй о тайне. Слова «болезнь» в тексте нет, хотя карантин вводится именно из-за неё.\n\nЮристы того времени отмечали, что это был первый акт, где государство признавало: происходит нечто, о чём нельзя говорить прямо."}, {"id": "pl7", "kind": "ТВ", "title": "Человек, который поднял мост", "text": "Прямой репортаж: толпа видит силу своими глазами.", "img": "", "anim": "rise", "ago": 110, "view": "people", "form": "tv", "head": "Очевидец · рабочий порта", "body": "«Он просто подошёл и поднял. Не руками, а как будто поманил. Мост пошёл вверх.»", "long": "Репортёр оказался на набережной случайно: снимал сюжет о ремонте. Когда мост просел, он не выключил камеру. Плёнка показывает, как человек в серой куртке выходит вперёд, и пролёт поднимается на его глазах.\n\nВ эфир ушли три минуты. Ведущий потом извинялся за «технический сбой», но запись разошлась по городу копиями быстрее, чем её успели изъять."}, {"id": "pl8", "kind": "ТВ", "title": "Обращение к нации", "text": "Власть успокаивает и просит не верить слухам.", "img": "", "anim": "rise", "ago": 108, "view": "power", "form": "tv", "head": "Обращение · министр внутренних дел", "body": "«Происшествие на набережной было вызвано неисправностью опор. Просим граждан сохранять спокойствие.»", "long": "Через сутки после моста вышло обращение. Министр говорил четыре минуты и ни разу не сказал слово «человек». Опоры, подъёмные механизмы, инженерная ошибка.\n\nНа улицах это обращение хорошо запомнили: именно после него впервые заговорили, что власть знает больше. Фразу «сохраняйте спокойствие» стали шутя повторять в очередях."}, {"id": "pl9", "kind": "Записка", "title": "Протокол закрытого комитета", "text": "Власть признаёт друг перед другом то, что скрывает от всех.", "img": "", "anim": "rise", "ago": 95, "view": "closed", "form": "secret", "head": "Протокол · заседание № 3", "body": "Присутствовали: 5 членов.\nВопрос: масштаб явления.\nРешение: считать явление наследственным.", "long": "На заседании впервые прозвучало слово «наследственное». Комитет рассмотрел список из шестидесяти семей и пришёл к выводу, что подобные случаи будут повторяться.\n\nПротокол велено было хранить в сейфе, а копии не делать. Одну копию всё же сделал секретарь комитета. Позже она оказалась в архиве."}, {"id": "pl10", "kind": "Закон", "title": "Закон о регистрации одарённых", "text": "Первые статьи закона, который изменил жизнь миллионов.", "img": "", "anim": "rise", "ago": 70, "view": "power", "form": "law", "head": "Закон № 214 · ст. 1–4", "body": "Ст. 1. Лицо, проявившее необычные способности, обязано встать на учёт.\nСт. 2. Учёт ведёт ведомство по делам одарённых.", "long": "Закон принят большинством в один голос. Вторая статья создаёт отдельное ведомство, которое должно хранить сведения о каждом носителе. Четвёртая определяет штраф за уклонение от регистрации.\n\nДебаты в зале заседаний длились девять дней. Противники закона предупреждали о клейме, сторонники говорили о защите. На последней минуте голосования один депутат покинул зал, и это решило исход."}, {"id": "pl11", "kind": "Лаборатория", "title": "Методика классификации способностей", "text": "Лаборатория пытается свести невозможное к таблице.", "img": "", "anim": "rise", "ago": 55, "view": "science", "form": "lab", "head": "Институт одарённости · методика", "body": "Класс A: воздействие на предметы.\nКласс B: изменения организма.\nКласс C: прочее. Спорных: 31%.", "long": "Методика разделила все наблюдаемые способности на три класса. Учёные признавали в предисловии, что треть случаев не вписывается ни в один из них.\n\nКласс «прочее» вскоре превратился в самый обсуждаемый: туда писали всё, что не хотели объяснять. Через несколько лет его просто разделили на ещё три класса, а прежние данные пересчитали."}, {"id": "pl12", "kind": "Газета", "title": "Письма читателей: мой сын отмечен", "text": "Люди пишут, как закон вошёл в их семьи.", "img": "", "anim": "rise", "ago": 40, "view": "people", "form": "paper", "head": "Мой сын отмечен", "body": "«Сын вернулся из ведомства с бумагой. Говорит, что теперь он учтён. Я не знаю, плакать мне или радоваться.»", "long": "Мы получили более четырёхсот писем после вступления закона в силу. Одни родители благодарят государство за заботу, другие обвиняют его в том, что детей забирают в «особые классы».\n\nПисьмо, которое мы печатаем, принадлежит женщине из рабочего района. Она не просит ничего, кроме одного: чтобы её мальчика не называли «номером»."}, {"id": "pl13", "kind": "Газета", "title": "Беспорядки на площади", "text": "Народ выходит на улицы против списков.", "img": "", "anim": "rise", "ago": 25, "view": "people", "form": "paper", "head": "Беспорядки на площади", "body": "Вчера вечером на центральной площади собралось около трёх тысяч человек. Они требовали отмены закона о регистрации. Полиция применила силу.", "long": "По словам очевидцев, сначала в толпе были только родители. К вечеру подошли студенты, затем рабочие с соседних заводов. Лозунги менялись, но главный оставался прежним: «Не считайте нас».\n\nПолиция сообщила о десятках задержанных. Редакция располагает фотографиями, которые не вошли в номер по требованию цензора."}, {"id": "pl14", "kind": "Записка", "title": "Меморандум: неучтённое поколение", "text": "Власть признаёт, что часть носителей никогда не регистрировалась.", "img": "", "anim": "rise", "ago": 18, "view": "closed", "form": "secret", "head": "Меморандум · для членов кабинета", "body": "По оценке ведомства, учтено менее 60% носителей.\nНеучтённые группы действуют автономно.\nРекомендуется: наблюдение без огласки.", "long": "Меморандум составлен для узкого круга и напечатан на бумаге без водяных знаков. В нём сказано, что регистрация провалилась: многие семьи скрывали способности детей, а самих детей прятали.\n\nАвтор предлагает не ужесточать закон, а перейти к тихому наблюдению. Он признаёт, что это решение опасно, но называет его меньшим из зол."}, {"id": "pl15", "kind": "Лаборатория", "title": "Итоговый отчёт: маркер наследственности", "text": "Наука окончательно подтверждает то, что подозревали сто лет.", "img": "", "anim": "rise", "ago": 10, "view": "science", "form": "lab", "head": "Институт генетики · итоговый отчёт", "body": "Маркер найден у 41% обследованных.\nПередача по женской линии.\nПроявление: от рождения до 60 лет.", "long": "Отчёт подтверждает, что способность передаётся по женской линии и может проявиться через несколько поколений. Это значит, что даже самые «обычные» семьи могут оказаться носителями.\n\nАвторы отчёта просили не публиковать его целиком. Публично прозвучали только общие выводы, а таблицы остались в архиве института."}, {"id": "pl16", "kind": "Радио", "title": "Эфир: герой сорвался", "text": "Люди слышат новость и не знают, кому верить.", "img": "", "anim": "rise", "ago": 3, "view": "people", "form": "radio", "head": "Экстренный выпуск", "body": "Диктор: «Один из самых известных героев потерял контроль. Просим жителей центра остаться дома.»\nСлушатель: «Кто именно?»\nДиктор: «Информации нет.»", "long": "Экстренный выпуск вышел в одиннадцать вечера. Диктор читал по бумажке и дважды сбивался. В студию звонили сотни людей, но в эфир попал один звонок: женщина спросила, кто именно, и ей ответили, что информации нет.\n\nНа следующий день на улицах стали говорить, что виноваты все со способностями. Первые камни полетели в витрины уже к обеду."}, {"id": "pl17", "kind": "ТВ", "title": "Заявление мэрии", "text": "Власть обещает порядок и не называет имён.", "img": "", "anim": "rise", "ago": 2, "view": "power", "form": "tv", "head": "Заявление · мэр города", "body": "«Город под контролем. Происшествие в центре носит локальный характер. Просим граждан не поддаваться панике.»", "long": "Мэр выступил в прямом эфире, стоя у окна, за которым ещё дымилось здание. Он говорил пять минут и ни разу не произнёс имя героя.\n\nПозже выяснилось, что заявление готовили три часа и переписывали дважды: сначала фраза «герой» была заменена на «человек», потом слово «человек» убрали вовсе."}],
+  plotEras: [{"name": "Вспышка", "from": 150, "to": 149, "intro": "Небо над городами светится, связь сбоит, а мир уверен, что это магнитная буря. Власть успокаивает, наука измеряет, улица шутит. И только в самых дальних папках уже лежит первая записка о больнице."}, {"name": "Нулевое поколение", "from": 149, "to": 120, "intro": "Рождаются первые дети, которые не болеют и странно себя ведут. Врачи собирают образцы, власть вводит карантины, а родители боятся говорить вслух о том, что видят дома."}, {"name": "Первый открытый супер", "from": 120, "to": 80, "intro": "Человек впервые показывает силу на глазах у толпы. Мир делится на тех, кто хочет героя, и тех, кто хочет закон. Закрытые комитеты уже знают больше, чем говорят в эфире."}, {"name": "Эпоха регистрации", "from": 80, "to": 30, "intro": "Государство пытается всё посчитать. Появляются законы о регистрации, методики классификации и очереди перед кабинетами. Для одних это защита, для других клеймо."}, {"name": "Раскол", "from": 30, "to": 5, "intro": "Выясняется, что часть носителей никто не учёл. Площади, меморандумы, итоговые отчёты. Каждая сторона уверена, что говорит от имени всего мира."}, {"name": "Сейчас", "from": 5, "to": 0, "intro": "Самый легендарный герой «взбесился», и люди не знают, кто из пятёрки. Народ озлоблен на всех со способностями, власть молчит, закрытые документы шепчут о том, что это давно предсказывали."}],
   world: [
     { title: "Общая картина", text: "Время, место и главная особенность вашего мира.", body: "Здесь начинается статья. Расскажите подробно об этой части мира: что это, как возникло и почему важно для героев.", body2: "Продолжение статьи: детали, примеры, связи с другими частями мира.", wide1: "", sq1: "", sq2: "", wide2: "" },
     { title: "Локации", text: "Ключевые места, где разворачивается действие.", body: "Опишите места: как они выглядят, кто там бывает, что там можно найти.", body2: "", wide1: "", sq1: "", sq2: "", wide2: "" },
@@ -1451,7 +1505,30 @@ function normalize(d){
   if (!o.home.blocks.some(b => b.kind === "links")) o.home.blocks.push({id: "hb-links", kind: "links"});
   o.home.blocks = o.home.blocks.filter((b, i, a) => (b.kind !== "specs" && b.kind !== "links") || a.findIndex(x => x.kind === b.kind) === i);
   o.plotText = str(d.plotText, o.plotText);
-  if (Array.isArray(d.plot)) o.plot = d.plot.filter(r => r && typeof r === "object").slice(0, 200).map(r => ({id: str(r.id) || ("pl" + Math.random().toString(36).slice(2, 8)), kind: str(r.kind).slice(0, 40), title: str(r.title).slice(0, 200), text: str(r.text).slice(0, 20000), img: str(r.img), anim: ["rise", "drop", "slide", "tv", "fade"].includes(r.anim) ? r.anim : "rise"}));
+  if (Array.isArray(d.plotEras) && d.plotEras.filter(x => x && typeof x === "object").length){
+    const def = o.plotEras, num = (v, f) => typeof v === "number" && isFinite(v) ? Math.round(v) : f, eras = [];
+    d.plotEras.filter(x => x && typeof x === "object").slice(0, 30).forEach((x, i) => {
+      const dd = def[i] || {name: "Эпоха", intro: "", from: 0, to: 0}, p = eras[eras.length - 1];
+      let f = Math.max(1, Math.min(999, num(x.from, dd.from)));
+      if (p){ f = Math.min(f, p.from - 1); if (f < 1) return; p.to = f; }
+      eras.push({name: str(x.name, dd.name).slice(0, 60), intro: str(x.intro, dd.intro).slice(0, 4000), from: f, to: Math.max(0, Math.min(f - 1, num(x.to, dd.to)))});
+    });
+    o.plotEras = eras;
+  }
+  if (Array.isArray(d.plot)){
+    const rows = d.plot.filter(r => r && typeof r === "object");
+    /* старые два примера-заглушки заменяем новыми документами; чужие записи не трогаем */
+    const isSample = r => typeof r.ago !== "number" && /^pl[12]$/.test(str(r.id)) && /^Пример:/.test(str(r.title));
+    const own = rows.filter(r => !isSample(r)), hadSample = own.length < rows.length;
+    const mine = own.slice(0, 200).map((r, i, all) => {
+      const k = str(r.kind), form = ["paper", "radio", "tv", "law", "lab", "secret"].includes(r.form) ? r.form : /радио/i.test(k) ? "radio" : /тв|теле/i.test(k) ? "tv" : /закон|указ|постан/i.test(k) ? "law" : /лаб|отчёт|отчет|иссл/i.test(k) ? "lab" : /секрет|записк|закрыт/i.test(k) ? "secret" : "paper";
+      return {id: str(r.id) || ("pl" + Math.random().toString(36).slice(2, 8)), kind: k.slice(0, 40), title: str(r.title).slice(0, 200), text: str(r.text).slice(0, 20000), img: str(r.img), anim: "rise",
+        ago: typeof r.ago === "number" && isFinite(r.ago) ? Math.max(0, Math.min(999, Math.round(r.ago))) : Math.round(150 - i * 150 / Math.max(1, all.length - 1)),
+        view: ["power", "science", "people", "closed"].includes(r.view) ? r.view : "people", form,
+        head: str(r.head).slice(0, 300), body: str(r.body).slice(0, 20000), long: str(r.long).slice(0, 40000)};
+    });
+    o.plot = hadSample ? mine.concat(o.plot) : mine;
+  }
   if (Array.isArray(d.world)) o.world = d.world.filter(Boolean).map(r => ({id: str(r.id), title: str(r.title), text: str(r.text), body: str(r.body), body2: str(r.body2), wide1: str(r.wide1), sq1: str(r.sq1), sq2: str(r.sq2), wide2: str(r.wide2)}));
   if (Array.isArray(d.timeline)) o.timeline = d.timeline.filter(Boolean).map(r => ({date: str(r.date), title: str(r.title), text: str(r.text)}));
   if (Array.isArray(d.faq)) o.faq = d.faq.filter(Boolean).map(f => ({q: str(f.q), a: str(f.a)}));
@@ -3549,65 +3626,169 @@ function rowTools(arr, i){
     dangerBtn("Удалить", () => change(() => arr.splice(i, 1)))) : null;
 }
 const addBtn = (label, fn) => editing ? h("button", {class: "addline", type: "button", onclick: () => change(fn)}, icon("plus"), label) : null;
-const PLOT_ANIMS = [["rise", "Всплывает снизу"], ["drop", "Падает, как газета"], ["slide", "Выезжает сбоку"], ["tv", "Включается, как телевизор"], ["fade", "Проявляется"]];
-function plotItem(P, i){
-  const p = P[i], src = srcOf(p.img);
-  const media = h("div", {class: "pf-src", "data-anim": p.anim},
-    src ? h("img", {src, alt: p.title || "", loading: "lazy", onerror: e => e.target.remove()}) : (editing ? h("div", {class: "pf-ph"}, "Здесь будет картинка источника") : null));
-  let tools = null;
-  if (editing){
-    const sel = h("select", {"aria-label": "Как появляется запись"}, PLOT_ANIMS.map(a => h("option", {value: a[0]}, a[1])));
-    sel.value = p.anim;
-    sel.onchange = () => change(() => { p.anim = sel.value; });
-    tools = h("div", {class: "pf-tools"}, imgButtons(p, "img", p.img ? "Сменить картинку" : "Загрузить картинку", 1400, true), sel,
-      toolBtn("up", "", () => change(() => move(P, i, -1)), "Переместить выше"),
-      toolBtn("down", "", () => change(() => move(P, i, 1)), "Переместить ниже"),
-      dangerBtn("Удалить запись", () => change(() => P.splice(i, 1))));
-  }
-  return h("article", {class: "pf-item"},
-    h("div", {class: "pf-meta"},
-      h("span", {class: "pf-no"}, "Запись " + (i + 1) + " из " + P.length),
-      (p.kind || editing) ? ed("span", {class: "pf-kind"}, () => p.kind, v => p.kind = v, {ph: "Источник: радио, газета, ТВ", max: 40}) : null,
-      ed("h3", {}, () => p.title, v => p.title = v, {ph: "Заголовок записи"}),
-      (p.text || editing) ? ed("div", {class: "pf-text"}, () => p.text, v => p.text = v, {multi: true, ph: "Подпись или текст записи"}) : null,
-      tools),
-    media);
+/* ---------- Сюжет: ползунок лет ---------- */
+const PL_VIEWS = {power: ["Власть", "#4aa3ff"], science: ["Наука", "#46d39a"], people: ["Народ", "#ffb84a"], closed: ["Закрыто", "#ff5d5d"]};
+const PL_FORMS = {paper: ["Газета", "ГВ", "#e9e2cf", "#23201a"], radio: ["Радио", "FM", "#1b1d33", "#f5ab00"], tv: ["ТВ", "TV", "#05060f", "#ff6a5c"], law: ["Закон", "§", "#f4f1e8", "#23201a"], lab: ["Лаборатория", "Л", "#0f1f1d", "#7fe7cf"], secret: ["Записка", "С/С", "#2a0d0d", "#ff8f8f"]};
+let plSel = "", plAgo = 150;
+const plAgoText = n => n === 0 ? "сейчас" : n + " " + plural(n, ["год", "года", "лет"]) + " назад";
+const plEraOf = (E, a) => { let k = 0; E.forEach((e, i) => { if (a <= e.from) k = i; }); return k; };
+/* картинка источника, а если её нет, то заглушка по виду документа */
+function plDoc(c){
+  const src = srcOf(c.img);
+  if (src) return h("div", {class: "pd pd-img"}, h("img", {src, alt: c.title || "", loading: "lazy", onerror: e => e.target.remove()}));
+  const head = (tag, cls) => ed(tag, {class: cls || null}, () => c.head || c.title, v => c.head = v, {ph: "Заголовок документа", max: 200});
+  const body = cls => ed("div", {class: cls}, () => c.body, v => c.body = v, {multi: true, ph: "Текст документа"});
+  const f = c.form;
+  if (f === "radio") return h("div", {class: "pd pd-radio"}, h("div", {class: "pd-dial"}, head("span"), h("span", {}, "FM 91.4")), h("div", {class: "pd-wave"}, Array.from({length: 18}, () => h("i"))), body("pd-rl"));
+  if (f === "tv") return h("div", {class: "pd pd-tv"}, h("div", {class: "pd-scr"}, h("span", {class: "pd-tag"}, "● ПРЯМОЙ ЭФИР"), h("div", {class: "pd-face"}), head("div", "pd-chy")), body("pd-cap"));
+  if (f === "law") return h("div", {class: "pd pd-law"}, h("div", {class: "pd-lh"}, h("span", {}, "Официальный текст"), h("span", {}, (plain(c.head || c.title).match(/№\s*\d+/) || [""])[0])), head("h4"), body("pd-lb"), h("span", {class: "pd-seal"}, "печать"));
+  if (f === "lab") return h("div", {class: "pd pd-lab"}, h("div", {class: "pd-lh"}, head("b"), h("span", {}, "ОТЧЁТ")), h("div", {class: "pd-bars"}, [40, 72, 55, 90, 34, 66, 80].map(v => h("i", {style: "--h:" + v + "%"}))), body("pd-lb"));
+  if (f === "secret") return h("div", {class: "pd pd-secret"}, h("span", {class: "pd-stamp"}, "Секретно"), head("div", "pd-lh"), body("pd-lb"), h("div", {class: "pd-redact"}, h("i"), h("i"), h("i")));
+  return h("div", {class: "pd pd-paper"}, h("div", {class: "pd-mast"}, h("b", {}, "Городской вестник"), h("span", {}, "вечерний выпуск")), head("h4"), body("pd-cols"));
 }
-function plotFeedInit(root){
-  const items = [...root.querySelectorAll(".pf-item")], line = root.querySelector(".pf-line");
-  if (!items.length) return;
-  const animate = motionOn() && !editing;
-  const io = animate ? new IntersectionObserver(es => es.forEach(e => {
-    if (!e.isIntersecting) return;
-    const it = e.target, m = it.querySelector(".pf-meta"), s = it.querySelector(".pf-src"), a = s.dataset.anim;
-    it.classList.add("seen"); m.classList.remove("pre");
-    if (a === "drop" || a === "tv"){ s.classList.remove("pre-" + a); s.classList.add("go-" + a); }
-    else { s.classList.add("go-" + a); requestAnimationFrame(() => s.classList.remove("pre-" + a)); }
-    io.unobserve(it);
-  }), {threshold: .2}) : null;
-  items.forEach(it => {
-    if (!animate || it.getBoundingClientRect().top < innerHeight * .8){ it.classList.add("seen"); return; }
-    const s = it.querySelector(".pf-src"), a = s.dataset.anim;
-    it.classList.add("mo"); it.querySelector(".pf-meta").classList.add("pre"); s.classList.add("pre-" + a);
-    io.observe(it);
-  });
-  if (line){
-    const upd = () => { const r = root.getBoundingClientRect(); line.style.setProperty("--p", Math.max(0, Math.min(1, (innerHeight * .6 - r.top) / Math.max(1, r.height)))); };
-    if (window._pfScroll) removeEventListener("scroll", window._pfScroll);
-    window._pfScroll = () => requestAnimationFrame(upd);
-    addEventListener("scroll", window._pfScroll, {passive: true});
-    upd();
-  }
+function plEditPanel(c){
+  if (!editing) return null;
+  const P = C.plot, mk = (label, el) => h("label", {}, label, el);
+  const selOf = (map, key) => {
+    const s = h("select", {}, Object.entries(map).map(([k, v]) => h("option", {value: k}, v[0])));
+    s.value = c[key];
+    s.onchange = () => change(() => { c[key] = s.value; if (key === "form") c.kind = PL_FORMS[s.value][0]; });
+    return s;
+  };
+  const num = h("input", {type: "number", min: "0", max: "999", step: "1", value: String(c.ago)});
+  num.onchange = () => change(() => { const v = parseInt(num.value, 10); if (isFinite(v)) c.ago = Math.max(0, Math.min(999, v)); plAgo = c.ago; });
+  return h("div", {class: "pl-edit"},
+    imgButtons(c, "img", c.img ? "Сменить картинку" : "Загрузить картинку", 1400, true),
+    mk("Вид", selOf(PL_FORMS, "form")), mk("Взгляд", selOf(PL_VIEWS, "view")), mk("Лет назад", num),
+    dangerBtn("Удалить документ", () => change(() => { P.splice(P.indexOf(c), 1); plSel = ""; })));
 }
 function viewPlot(){
-  const P = C.plot;
-  const feed = h("div", {class: "pf"}, h("div", {class: "pf-line"}), P.map((_, i) => plotItem(P, i)));
-  setTimeout(() => plotFeedInit(feed), 0);
-  return h("div", {class: "plot"},
+  const P = C.plot, E = C.plotEras;
+  const top = [
     ed("h2", {}, () => C.pages.plot.title, v => C.pages.plot.title = v, {ph: "Сюжет", after: renderTabs}),
-    (C.plotText || editing) ? ed("div", {class: "plot-text"}, () => C.plotText, v => C.plotText = v, {multi: true, ph: "Вступление к сюжету (можно оставить пустым)"}) : null,
-    P.length ? feed : null,
-    addBtn("Добавить запись", () => P.push({id: uid(), kind: "", title: "Новая запись", text: "", img: "", anim: "rise"})));
+    (C.plotText || editing) ? ed("div", {class: "plot-text"}, () => C.plotText, v => C.plotText = v, {multi: true, ph: "Вступление к сюжету (можно оставить пустым)"}) : null];
+  const addDoc = addBtn("Добавить документ", () => {
+    const c = {id: uid(), kind: "Газета", title: "Новый документ", text: "Короткое описание.", img: "", anim: "rise", ago: Math.round(plAgo), view: "people", form: "paper", head: "Заголовок документа", body: "Текст документа.", long: "Полный текст документа."};
+    P.push(c); plSel = c.id;
+  });
+  if (!P.length) return h("div", {class: "plot"}, top, h("div", {class: "empty"}, "Документов пока нет."), addDoc);
+  const order = () => P.map((_, i) => i).sort((a, b) => P[b].ago - P[a].ago || a - b);
+  const nearest = a => { let b = 0; P.forEach((c, i) => { if (Math.abs(c.ago - a) < Math.abs(P[b].ago - a)) b = i; }); return b; };
+  let cur = P.findIndex(c => c.id === plSel);
+  if (cur < 0) cur = nearest(plAgo);
+  else if (nearest(plAgo) !== cur) plAgo = P[cur].ago;
+  plSel = P[cur].id;
+  /* шкала сжимается под нужный отрезок: в просмотре пустые эпохи по краям скрыты, края шкалы берутся из эпох и документов */
+  const has = E.map(() => false); P.forEach(c => { has[plEraOf(E, c.ago)] = true; });
+  let k0 = 0, k1 = E.length - 1;
+  if (!editing){ while (k0 < k1 && !has[k0]) k0++; while (k1 > k0 && !has[k1]) k1--; }
+  let rMax = E[k0].from, rMin = E[k1].to;
+  P.forEach(c => { rMax = Math.max(rMax, c.ago); rMin = Math.min(rMin, c.ago); });
+  if (rMax - rMin < 1) rMax = rMin + 1;
+  const span = rMax - rMin, pc = a => Math.max(0, Math.min(100, (rMax - a) / span * 100)).toFixed(2);
+  plAgo = Math.max(rMin, Math.min(rMax, plAgo));
+  /* шкала: сверху подписи эпох, под ними точки документов, внизу линия */
+  const track = h("div", {class: "pl-trk"});
+  const vis = E.map((e, k) => k).slice(k0, k1 + 1);
+  const eFrom = k => k === k0 ? rMax : E[k].from, eTo = k => k === k1 ? rMin : E[k].to;
+  const bands = h("div", {class: "pl-bands"}, vis.map(k => h("i", {class: "pl-band b" + (k % 2), style: "left:" + pc(eFrom(k)) + "%;width:" + ((eFrom(k) - eTo(k)) / span * 100).toFixed(2) + "%"})));
+  const labs = vis.map(k => {
+    const w = (eFrom(k) - eTo(k)) / span * 100, narrow = w < 12;
+    return h("span", {class: "pl-lab" + (narrow ? " r2" : ""), style: narrow ? (k === k1 ? "right:0" : "left:" + pc(eFrom(k)) + "%") : "left:" + pc(eFrom(k)) + "%;width:" + w.toFixed(2) + "%"}, E[k].name);
+  });
+  const dots = P.map((c, i) => h("button", {class: "pl-tk", type: "button", "aria-label": plain(c.title) || "Документ", style: "left:" + pc(c.ago) + "%;background:" + (PL_VIEWS[c.view] || PL_VIEWS.people)[1], onclick: () => select(i, true)}));
+  const hnd = h("div", {class: "pl-hnd", role: "slider", tabindex: "0", "aria-label": "Год", "aria-valuemin": String(rMin), "aria-valuemax": String(rMax)});
+  track.append(bands, ...labs, ...dots, hnd);
+  const big = h("b"), eraEl = h("span", {class: "pl-era"});
+  const cnt = h("span", {class: "pl-n"});
+  const mkBtn = (txt, pri, fn) => h("button", {class: "pl-btn" + (pri ? " pri" : ""), type: "button", onclick: fn}, txt);
+  const prevs = [mkBtn("← Раньше", false, () => step(-1))], nexts = [mkBtn("Позже →", true, () => step(1))];
+  const eraBox = h("div", {class: "pl-eraintro"}), screen = h("div", {class: "pl-screen", "aria-live": "polite"});
+  let eraShown = -1;
+  const drawEra = k => {
+    eraShown = k;
+    eraBox.replaceChildren(...[
+      editing ? ed("div", {class: "pl-eraname"}, () => E[k].name, v => E[k].name = v, {ph: "Название эпохи", max: 60, after: () => render()}) : null,
+      (E[k].intro || editing) ? ed("div", {class: "pl-intro"}, () => E[k].intro, v => E[k].intro = v, {multi: true, ph: "Коротко об этой эпохе"}) : null,
+      editing ? eraTools(k) : null].filter(Boolean));
+  };
+  const eraTools = k => {
+    const e = E[k], numIn = (val, fn) => { const i = h("input", {type: "number", min: "0", max: "999", step: "1", value: String(val)}); i.onchange = () => { const v = parseInt(i.value, 10); if (isFinite(v)) change(() => fn(v)); else i.value = String(val); }; return i; };
+    return h("div", {class: "pl-edit"},
+      h("label", {}, "Начало, лет назад", numIn(e.from, v => { v = Math.max(e.to + 1, Math.min(k > 0 ? E[k - 1].from - 1 : 999, v)); e.from = v; if (k > 0) E[k - 1].to = v; })),
+      k === E.length - 1 ? h("label", {}, "Конец, лет назад", numIn(e.to, v => { e.to = Math.max(0, Math.min(e.from - 1, v)); })) : null,
+      e.from - e.to >= 2 ? toolBtn("plus", "Добавить эпоху после этой", () => change(() => { const mid = Math.round((e.from + e.to) / 2); E.splice(k + 1, 0, {name: "Новая эпоха", intro: "", from: mid, to: e.to}); e.to = mid; })) : h("span", {class: "pl-n"}, "Эпоха слишком короткая, чтобы делить"),
+      E.length > 1 ? dangerBtn("Удалить эпоху", () => change(() => { if (k > 0) E[k - 1].to = e.to; E.splice(k, 1); })) : null);
+  };
+  const drawDoc = () => {
+    const c = P[cur], F = PL_FORMS[c.form] || PL_FORMS.paper, V = PL_VIEWS[c.view] || PL_VIEWS.people, k = plEraOf(E, c.ago), o = order(), p = o.indexOf(cur);
+    const nb = (i, dir) => i < 0 || i >= o.length ? h("span") : h("button", {class: "pl-btn", type: "button", onclick: () => select(o[i], true)}, dir < 0 ? "← " + (plain(P[o[i]].title) || "Раньше") : (plain(P[o[i]].title) || "Позже") + " →");
+    screen.replaceChildren(h("article", {class: "pl-rdr", style: "--vc:" + V[1]},
+      h("span", {class: "pl-no"}, plAgoText(c.ago) + " · " + F[0] + " · ", h("em", {}, V[0]), " · " + E[k].name),
+      ed("h3", {}, () => c.title, v => c.title = v, {ph: "Заголовок документа"}),
+      (c.text || editing) ? ed("p", {class: "pl-lead"}, () => c.text, v => c.text = v, {ph: "Короткое описание"}) : null,
+      h("div", {class: "pl-grid"},
+        h("div", {class: "pl-aside"}, plDoc(c), plEditPanel(c)),
+        (c.long || editing) ? ed("div", {class: "pl-text"}, () => c.long, v => c.long = v, {multi: true, ph: "Полный текст документа"}) : null),
+      h("div", {class: "pl-nav"}, nb(p - 1, -1), nb(p + 1, 1))));
+  };
+  const paint = () => {
+    const a = Math.round(plAgo), k = plEraOf(E, a), o = order(), p = o.indexOf(cur);
+    hnd.style.left = pc(plAgo) + "%";
+    hnd.setAttribute("aria-valuenow", String(a)); hnd.setAttribute("aria-valuetext", plAgoText(a));
+    big.textContent = plAgoText(a); eraEl.textContent = E[k].name;
+    dots.forEach((d, i) => d.classList.toggle("on", i === cur));
+    cnt.textContent = (p + 1) + " / " + o.length;
+    prevs.forEach(b => b.disabled = p === 0); nexts.forEach(b => b.disabled = p === o.length - 1);
+    if (k !== eraShown) drawEra(k);
+  };
+  function select(i, snap){
+    const changed = i !== cur;
+    cur = i; plSel = P[i].id;
+    if (snap) plAgo = P[i].ago;
+    paint();
+    if (changed || !screen.firstChild) drawDoc();
+  }
+  function step(d){ const o = order(), p = Math.max(0, Math.min(o.length - 1, o.indexOf(cur) + d)); select(o[p], true); }
+  const upd = a => { plAgo = Math.max(rMin, Math.min(rMax, a)); const n = nearest(plAgo); if (n !== cur) select(n, false); else paint(); };
+  const fromX = x => { const r = track.getBoundingClientRect(); return rMax - (x - r.left) / (r.width || 1) * span; };
+  let drag = false;
+  track.addEventListener("pointerdown", e => { if (e.target.closest(".pl-tk")) return; drag = true; track.classList.add("drag"); try{ track.setPointerCapture(e.pointerId); }catch(_){} upd(fromX(e.clientX)); });
+  track.addEventListener("pointermove", e => { if (drag) upd(fromX(e.clientX)); });
+  const stop = () => { drag = false; track.classList.remove("drag"); };
+  track.addEventListener("pointerup", stop); track.addEventListener("pointercancel", stop);
+  hnd.addEventListener("keydown", e => {
+    const k = e.key;
+    if (k === "ArrowLeft" || k === "ArrowDown"){ e.preventDefault(); upd(Math.round(plAgo) + 1); }
+    else if (k === "ArrowRight" || k === "ArrowUp"){ e.preventDefault(); upd(Math.round(plAgo) - 1); }
+    else if (k === "Home"){ e.preventDefault(); upd(rMax); }
+    else if (k === "End"){ e.preventDefault(); upd(rMin); }
+  });
+  /* точки документов, стоящие близко, поднимаем на второй и третий ряд, чтобы не слипались и не лезли под подписи эпох */
+  const layout = () => {
+    if (!track.isConnected) return;
+    const W = track.clientWidth || 800, placed = [], LZ = W < 560 ? 70 : 54; let max = 0;
+    track.style.setProperty("--lz", LZ + "px"); track.style.setProperty("--r2", (LZ - 18) + "px");
+    order().forEach(i => {
+      const x = (rMax - P[i].ago) / span * W; let l = 0;
+      while (placed.some(q => q[1] === l && Math.abs(q[0] - x) < 18)) l++;
+      placed.push([x, l]); max = Math.max(max, l);
+      dots[i].style.bottom = (14 + l * 18) + "px";
+    });
+    track.style.height = (LZ + 14 + (max + 1) * 18 + 6) + "px";
+  };
+  const onResize = () => { if (!track.isConnected){ removeEventListener("resize", onResize); return; } layout(); };
+  addEventListener("resize", onResize);
+  requestAnimationFrame(layout);
+  paint(); drawDoc();
+  return h("div", {class: "plot"}, top,
+    h("div", {class: "pl-scrub"},
+      h("div", {class: "pl-read"}, big, eraEl), track,
+      h("div", {class: "pl-axis"}, h("span", {}, plAgoText(rMax)), h("span", {}, span >= 20 ? String(Math.round((rMax + rMin) / 2)) : ""), h("span", {}, plAgoText(rMin))),
+      h("div", {class: "pl-ctl"}, prevs[0], cnt, nexts[0])),
+    eraBox, screen,
+    h("div", {class: "pl-legend"}, Object.values(PL_VIEWS).map(v => h("span", {}, h("i", {style: "background:" + v[1]}), v[0]))),
+    addDoc);
 }
 let worldOpen = -1;
 function openWorld(i){
@@ -3875,7 +4056,7 @@ function buildIndex(){
   add("home", "Главная", H.headline, [H.aside, H.tags, H.note].concat(H.blocks.filter(b => b.kind === "card").map(b => b.text)).join(" "));
   H.facts.forEach(f => add("home", "Главная", f.label, f.value));
   add("plot", C.pages.nav.title + " · " + C.pages.plot.title, C.pages.plot.title, C.plotText);
-  C.plot.forEach(p => out.push({tab: "plot", label: C.pages.nav.title + " · " + C.pages.plot.title, title: p.title || p.kind || "Запись", text: [p.kind, p.text].join(" "), target: "plot"}));
+  C.plot.forEach(p => out.push({tab: "plot", label: C.pages.nav.title + " · " + C.pages.plot.title, title: p.title || p.kind || "Запись", text: [p.kind, p.text, plain(p.head), plain(p.body), plain(p.long)].join(" "), target: "plot"}));
   C.world.forEach(x => out.push({tab: "world", label: C.pages.nav.title + " · " + C.pages.world.title, title: x.title, text: [x.text, x.body, x.body2].join(" "), target: "world/" + idOf(x)}));
   C.timeline.forEach(x => add("timeline", C.pages.nav.title + " · " + C.pages.timeline.title, x.title, x.date + " " + x.text));
   C.teams.forEach(t => { out.push({tab: "characters", label: "Персонажи", title: t.name, text: t.about, target: "team/" + idOf(t)}); t.chars.forEach(c => out.push({tab: "characters", label: "Персонажи · " + t.name, title: c.name + (c.alias ? " · " + c.alias : ""), text: [c.alias, c.age, c.power, c.desc, c.player, c.story, c.story2].join(" "), target: "char/" + idOf(c)})); });
