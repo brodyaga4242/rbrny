@@ -594,6 +594,12 @@ html.no-pieces .hero-in::after{display:none}
 .pl-edit label{display:grid;gap:2px;color:var(--muted)}
 .pl-edit select,.pl-edit input{max-width:100%;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
 .pl-edit input{width:90px}
+.pl-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.pl-gitem{display:grid;gap:6px;align-content:start}
+.pl-gi{box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.pl-gi img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
+.pl-gph{display:grid;place-items:center;aspect-ratio:4/3;border:1px dashed var(--line);color:var(--muted);font-size:13px}
+.pl-gtools{display:flex;flex-wrap:wrap;gap:6px}
 .pl-vedit{display:grid;gap:8px;justify-items:start;margin-top:22px;padding:16px;border:1px dashed var(--line)}
 .pl-vrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .pl-vrow select{max-width:100%;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
@@ -1636,6 +1642,7 @@ function normalize(d){
       const k = str(r.kind), form0 = fids.includes(r.form) ? r.form : /радио/i.test(k) ? "radio" : /тв|теле/i.test(k) ? "tv" : /закон|указ|постан/i.test(k) ? "law" : /лаб|отчёт|отчет|иссл/i.test(k) ? "lab" : /секрет|записк|закрыт/i.test(k) ? "secret" : "paper", form = fids.includes(form0) ? form0 : fids[0];
       return {id: str(r.id) || ("pl" + Math.random().toString(36).slice(2, 8)), kind: k.slice(0, 40), title: str(r.title).slice(0, 200), text: str(r.text).slice(0, 20000), img: str(r.img), anim: "rise",
         ago: typeof r.ago === "number" && isFinite(r.ago) ? Math.max(0, Math.min(999, Math.round(r.ago))) : Math.round(150 - i * 150 / Math.max(1, all.length - 1)),
+        imgs: Array.isArray(r.imgs) ? r.imgs.filter(x => x && typeof x === "object" && str(x.img)).slice(0, 30).map(x => ({id: str(x.id) || ("i" + Math.random().toString(36).slice(2, 8)), img: str(x.img)})) : [],
         layout: ["cols", "wrap", "one"].includes(r.layout) ? r.layout : "auto",
         view: vids.includes(r.view) ? r.view : (vids.includes("people") ? "people" : vids[0]), form,
         head: str(r.head).slice(0, 300), body: str(r.body).slice(0, 20000), long: str(r.long).slice(0, 40000)};
@@ -3796,6 +3803,19 @@ function plViewsEditor(){
     }),
     Fm.length < 30 ? toolBtn("plus", "Добавить вид документа", () => change(() => { Fm.push({id: uid(), name: "Новый вид", look: "paper"}); })) : null);
 }
+/* дополнительные картинки документа: галерея под главной, каждая открывается на весь экран */
+function plGallery(c){
+  const list = (c.imgs || []).filter(x => editing || x.img);
+  if (!list.length) return null;
+  return h("div", {class: "pl-gal"}, list.map(it => {
+    const src = srcOf(it.img);
+    const tile = src ? h("button", {class: "pl-zoom pl-gi", type: "button", "aria-label": "Открыть картинку на весь экран", title: "Открыть на весь экран", onclick: e => plLightbox(src, c.title || "", e.currentTarget)}, h("img", {src, alt: "", loading: "lazy", onerror: e => e.target.closest(".pl-gi").remove()})) : h("div", {class: "pl-gph"}, "Картинка не выбрана");
+    const old = it.img;
+    return h("div", {class: "pl-gitem"}, tile, editing ? h("div", {class: "pl-gtools"},
+      imgButtons(it, "img", it.img ? "Сменить" : "Выбрать", 1400, false),
+      toolBtn("x", "Убрать", () => { change(() => { c.imgs.splice(c.imgs.indexOf(it), 1); }); saveNow().then(ok => { if (ok && assetsApi && isAsset(old)) assetsApi.delete(old).catch(() => {}); }); }, "Убрать картинку из документа")) : null);
+  }));
+}
 function plEditPanel(c){
   if (!editing) return null;
   const P = C.plot, mk = (label, el) => h("label", {}, label, el);
@@ -3807,6 +3827,7 @@ function plEditPanel(c){
   num.onchange = () => change(() => { const v = parseInt(num.value, 10); if (isFinite(v)) c.ago = Math.max(0, Math.min(999, v)); plAgo = c.ago; });
   return h("div", {class: "pl-edit"},
     imgButtons(c, "img", c.img ? "Сменить картинку" : "Загрузить картинку", 1400, true),
+    toolBtn("plus", "Добавить ещё картинку", () => { c.imgs = c.imgs || []; const it = {id: uid(), img: ""}; c.imgs.push(it); pickImage(it, "img", 1400); }),
     mk("Вёрстка текста", laySel(c)), mk("Вид", formSel(c)), mk("Источник", viewSel(c)), mk("Лет назад", num),
     dangerBtn("Удалить документ", () => change(() => { P.splice(P.indexOf(c), 1); plSel = ""; })));
 }
@@ -3877,7 +3898,7 @@ function viewPlot(){
       ed("h3", {}, () => c.title, v => c.title = v, {ph: "Заголовок документа"}),
       (c.text || editing) ? ed("p", {class: "pl-lead"}, () => c.text, v => c.text = v, {ph: "Короткое описание"}) : null,
       h("div", {class: "pl-grid"},
-        h("div", {class: "pl-aside"}, plDoc(c), plEditPanel(c)),
+        h("div", {class: "pl-aside"}, plDoc(c), plGallery(c), plEditPanel(c)),
         (c.long || editing) ? ed("div", {class: "pl-text"}, () => c.long, v => c.long = v, {multi: true, ph: "Полный текст документа"}) : null),
       h("div", {class: "pl-nav"}, nb(p - 1, -1), nb(p + 1, 1)));
     /* «Автоматически»: вертикальную картинку ставим слева, и текст её обтекает */
