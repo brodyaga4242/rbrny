@@ -582,6 +582,9 @@ html.no-pieces .hero-in::after{display:none}
 .pl-lay-wrap .pd.pd-img{max-width:none}
 .pl-lay-wrap .pd-img img{max-height:min(80vh,820px)}
 @media (max-width:760px){.pl-lay-wrap .pl-aside{float:none;width:auto;margin:0 0 20px}}
+/* при правке картинка и кнопки идут над текстом, чтобы они не закрывали поле для текста */
+.pl-ed.pl-lay-wrap .pl-aside{float:none;width:auto;margin:0 0 20px}
+.pl-ed .pl-text{min-height:4.5em!important}
 @media (max-width:860px){.pl-text{columns:auto}}
 .pd.pd-img{display:flex;justify-content:center;max-width:none;box-shadow:none}
 .pd-img .pl-zoom{width:auto;max-width:100%;box-shadow:0 10px 30px rgba(0,0,0,.4)}
