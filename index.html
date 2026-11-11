@@ -460,11 +460,14 @@ html{overflow-x:clip}
 .cm-compass i{position:absolute;inset:6px}
 .cm-compass i::before{content:"N";position:absolute;top:-2px;left:50%;transform:translateX(-50%);font:700 9px var(--mono);color:var(--red,#e5301f)}
 .cm-compass i::after{content:"";position:absolute;left:50%;top:12px;bottom:12px;width:2px;transform:translateX(-50%);background:linear-gradient(var(--red,#e5301f) 50%,#fff 50%)}
-.cm-hero{margin:8px 0 22px}
+.cm-hero{position:absolute;left:clamp(16px,3vw,48px);top:clamp(14px,2.4vw,30px);right:clamp(16px,3vw,48px);z-index:3;pointer-events:none;transition:opacity .45s,transform .45s}
+@media(max-width:900px){.cm-hero .lead{display:none}.cm-hero h2.cm-big{margin-top:12px}}
+.cm-hero.off{opacity:0;transform:translateY(-14px);visibility:hidden;transition:opacity .45s,transform .45s,visibility 0s .45s}
+.cm-hero [contenteditable]{pointer-events:auto}
 .cm-bub{position:relative;display:inline-block;background:var(--red,#e5301f);color:#fff;font:700 12px/1.3 var(--mono);letter-spacing:.16em;text-transform:uppercase;padding:7px 14px}
 .cm-bub::after{content:"";position:absolute;left:16px;top:100%;width:14px;height:12px;background:var(--red,#e5301f);clip-path:polygon(0 0,100% 0,0 100%)}
-.cm-hero h2.cm-big{margin:22px 0 0;font:700 clamp(54px,13vw,168px)/.92 "Roboto Condensed","Arial Narrow",sans-serif;letter-spacing:-.01em;text-transform:uppercase;color:#fff;text-wrap:initial}
-.cm-hero .lead{margin-top:14px;max-width:62ch}
+.cm-hero h2.cm-big{margin:16px 0 0;font:700 clamp(44px,9vw,150px)/.92 "Roboto Condensed","Arial Narrow",sans-serif;letter-spacing:-.01em;text-transform:uppercase;color:#fff;text-wrap:initial}
+.cm-hero .lead{margin:10px 0 0;max-width:min(62ch,60%);font-size:clamp(12px,1.1vw,15px);text-shadow:0 0 8px #000,0 0 3px #000}
 .cm-stage.place{cursor:crosshair}
 .cm-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .cm-tools select{flex:1 1 100%;min-width:0;background:#0a0a0a;color:#fff;border:1px solid var(--line);padding:8px 10px;font:600 12px var(--mono)}
@@ -4264,15 +4267,15 @@ function viewMap(){
       h("span", {class: "cm-no"}, own ? "Метка " + pad(cmSel.i + 1) + " / " + pad(MK.length) : scar ? "Инцидент" : "Район " + pad(cmSel.i + 1) + " / " + pad(D.length)),
       ed("h3", {}, () => d.n, v => d.n = v, {ph: "Название", after: syncPins}),
       ed("span", {class: "cm-tag " + k}, () => d.t, v => d.t = v, {ph: "Подпись"}),
-      ed("p", {}, () => d.d, v => d.d = v, {multi: true, ph: "Описание"}), tools);
+      ed("p", {}, () => d.d, v => d.d = v, {multi: true, ph: "Описание"}), ...(tools ? [tools] : []));
     mark();
   }
   function pick(s, i){
     if (s === 0) i = (i + D.length) % D.length;
-    cmSel = {s, i}; cmFocus = true; ST.sel = cmSel; ST.focus = true; ST.zoomT = 1; ST.userT = performance.now();
+    cmSel = {s, i}; cmFocus = true; hero.classList.add("off"); ST.sel = cmSel; ST.focus = true; ST.zoomT = 1; ST.userT = performance.now();
     paint(); if (ctl) ctl.kick();
   }
-  function showAll(){ cmFocus = false; ST.focus = false; ST.zoomT = 1; ST.userT = performance.now(); if (ctl) ctl.kick(); }
+  function showAll(){ cmFocus = false; hero.classList.remove("off"); ST.focus = false; ST.zoomT = 1; ST.userT = performance.now(); if (ctl) ctl.kick(); }
   /* повторное нажатие на уже выбранный объект возвращает общий вид города */
   function toggle(s, i){ if (cmFocus && cmSel.s === s && cmSel.i === i) showAll(); else pick(s, i); }
   const nav = h("div", {class: "cm-nav"},
@@ -4299,7 +4302,8 @@ function viewMap(){
     ed("span", {class: "cm-bub"}, () => PM.title, v => PM.title = v, {ph: "Надпись", after: render}),
     ed("h2", {class: "cm-big"}, () => PM.big, v => PM.big = v, {ph: "Заголовок"}),
     (PM.lead || editing) ? ed("p", {class: "lead"}, () => PM.lead, v => PM.lead = v, {multi: true, ph: "Пояснение"}) : null);
-  const root = h("div", {}, hero, h("div", {class: "cm"}, stage, h("div", {class: "cm-card"}, body, nav)),
+  stage.append(hero); hero.classList.toggle("off", cmFocus);
+  const root = h("div", {}, h("div", {class: "cm"}, stage, h("div", {class: "cm-card"}, body, nav)),
     addBtn("Добавить метку на карту", () => { MK.push({id: "mk" + uid(), n: "Новая метка", t: "Подпись", d: "Описание метки.", x: 0, z: 0, k: ""}); cmSel = {s: 2, i: MK.length - 1}; cmFocus = false; cmPlacing = true; }),
     h("p", {class: "cm-legend"}, "Восьмиугольники: районы города. Красные квадраты: места боёв. Красным выделены корпорации и зоны бедствия." + (editing ? " Свои метки: кнопка «Добавить метку», затем клик по карте." : "")));
   loadThree().then(T => {
