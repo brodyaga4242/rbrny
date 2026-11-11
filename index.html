@@ -603,6 +603,15 @@ html.no-pieces .hero-in::after{display:none}
 .pl-gi img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
 .pl-gph{display:grid;place-items:center;aspect-ratio:4/3;border:1px dashed var(--line);color:var(--muted);font-size:13px}
 .pl-gtools{display:flex;flex-wrap:wrap;gap:6px}
+/* несколько картинок: все стоят рядом одной полосой, одной высоты */
+.pl-aside.pl-multi{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px;float:none!important;width:auto!important;margin:0 0 20px!important}
+.pl-multi .pl-gal{display:contents}
+.pl-multi .pd.pd-img,.pl-multi .pl-gitem{margin:0;flex:0 0 auto;display:grid;gap:6px;align-content:start;max-width:100%;width:auto}
+.pl-multi .pd-img .pl-zoom,.pl-multi .pl-gi{display:block;width:auto;max-width:100%;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.pl-multi .pd-img img,.pl-multi .pl-gi img{display:block;width:auto;max-width:100%;height:clamp(150px,28vh,260px);aspect-ratio:auto;object-fit:contain;margin:0}
+.pl-multi .pl-gph{width:200px;height:clamp(150px,28vh,260px);aspect-ratio:auto}
+.pl-multi .pl-edit{flex:0 0 100%}
+@media (max-width:760px){.pl-rdr:not(.pl-ed) .pl-aside.pl-multi{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:8px}.pl-rdr:not(.pl-ed) .pl-multi .pd.pd-img,.pl-rdr:not(.pl-ed) .pl-multi .pl-gitem{scroll-snap-align:start}.pl-multi .pd-img img,.pl-multi .pl-gi img{max-width:none}}
 .pl-vedit{display:grid;gap:8px;justify-items:start;margin-top:22px;padding:16px;border:1px dashed var(--line)}
 .pl-vrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .pl-vrow select{max-width:100%;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
@@ -3896,17 +3905,18 @@ function viewPlot(){
     const c = P[cur], F = [plForm(c.form).name], V = [plView(c.view).name, plView(c.view).color], k = plEraOf(E, c.ago), o = order(), p = o.indexOf(cur);
     const nb = (i, dir) => i < 0 || i >= o.length ? h("span") : h("button", {class: "pl-btn", type: "button", onclick: () => select(o[i], true)}, dir < 0 ? "← " + (plain(P[o[i]].title) || "Раньше") : (plain(P[o[i]].title) || "Позже") + " →");
     const lay0 = c.layout === "wrap" || c.layout === "one" ? c.layout : "cols";
+    const multi = (c.imgs || []).some(x => x.img) || (editing && (c.imgs || []).length > 0);
     const art = h("article", {class: "pl-rdr pl-lay-" + lay0 + (editing ? " pl-ed" : ""), style: "--vc:" + V[1]},
       h("span", {class: "pl-no"}, plAgoText(c.ago) + " · " + F[0] + " · ", h("em", {}, V[0]), " · " + E[k].name),
       ed("h3", {}, () => c.title, v => c.title = v, {ph: "Заголовок документа"}),
       (c.text || editing) ? ed("p", {class: "pl-lead"}, () => c.text, v => c.text = v, {ph: "Короткое описание"}) : null,
       h("div", {class: "pl-grid"},
-        h("div", {class: "pl-aside"}, plDoc(c), plGallery(c), plEditPanel(c)),
+        h("div", {class: "pl-aside" + (multi ? " pl-multi" : "")}, plDoc(c), plGallery(c), plEditPanel(c)),
         (c.long || editing) ? ed("div", {class: "pl-text"}, () => c.long, v => c.long = v, {multi: true, ph: "Полный текст документа"}) : null),
       h("div", {class: "pl-nav"}, nb(p - 1, -1), nb(p + 1, 1)));
     /* «Автоматически»: вертикальную картинку ставим слева, и текст её обтекает */
     const isrc = srcOf(c.img);
-    if ((c.layout || "auto") === "auto" && isrc){
+    if ((c.layout || "auto") === "auto" && isrc && !multi){
       const im = new Image();
       im.onload = () => { if (im.naturalHeight > im.naturalWidth * 1.1 && art.isConnected){ art.classList.remove("pl-lay-cols"); art.classList.add("pl-lay-wrap"); } };
       im.src = isrc;
