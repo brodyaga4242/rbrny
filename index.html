@@ -460,6 +460,14 @@ html{overflow-x:clip}
 .cm-compass i{position:absolute;inset:6px}
 .cm-compass i::before{content:"N";position:absolute;top:-2px;left:50%;transform:translateX(-50%);font:700 9px var(--mono);color:var(--red,#e5301f)}
 .cm-compass i::after{content:"";position:absolute;left:50%;top:12px;bottom:12px;width:2px;transform:translateX(-50%);background:linear-gradient(var(--red,#e5301f) 50%,#fff 50%)}
+.cm-hero{margin:8px 0 22px}
+.cm-bub{position:relative;display:inline-block;background:var(--red,#e5301f);color:#fff;font:700 12px/1.3 var(--mono);letter-spacing:.16em;text-transform:uppercase;padding:7px 14px}
+.cm-bub::after{content:"";position:absolute;left:16px;top:100%;width:14px;height:12px;background:var(--red,#e5301f);clip-path:polygon(0 0,100% 0,0 100%)}
+.cm-hero h2.cm-big{margin:22px 0 0;font:700 clamp(54px,13vw,168px)/.92 "Roboto Condensed","Arial Narrow",sans-serif;letter-spacing:-.01em;text-transform:uppercase;color:#fff;text-wrap:initial}
+.cm-hero .lead{margin-top:14px;max-width:62ch}
+.cm-stage.place{cursor:crosshair}
+.cm-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.cm-tools select{flex:1 1 100%;min-width:0;background:#0a0a0a;color:#fff;border:1px solid var(--line);padding:8px 10px;font:600 12px var(--mono)}
 .cm-hint{position:absolute;right:16px;bottom:14px;z-index:3;font:600 10px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:#8a8fb0;pointer-events:none}
 .cm-card{position:absolute;left:clamp(16px,3vw,48px);bottom:clamp(16px,3vw,36px);z-index:4;width:340px;display:flex;flex-direction:column;background:var(--panel);color:var(--ink);border:1px solid var(--line);padding:22px 22px 18px}
 .cm-zoom{position:absolute;right:14px;top:72px;z-index:3;display:flex;flex-direction:column;gap:6px}
@@ -1304,7 +1312,7 @@ const DEFAULTS = /*DEFAULTS-START*/{
     nav: { kicker: "Хроники", title: "Хроники", lead: "Сюжет, устройство мира и хронология событий.", heroImage: "" },
     plot: { kicker: "Канон", title: "Сюжет", lead: "Главные события и линии игры по главам.", heroImage: "" },
     world: { kicker: "Вселенная", title: "Информация о мире", lead: "Как устроен мир, где происходит действие и по каким законам он живёт.", heroImage: "" },
-    map: { kicker: "Город", title: "Карта города", lead: "Октополис с высоты: в центре корпорации и власти, вокруг жилые и рабочие районы, красным отмечены места боёв.", heroImage: "" },
+    map: { kicker: "Город", title: "Карта города", big: "Октополис", lead: "Октополис с высоты: в центре корпорации и власти, вокруг жилые и рабочие районы, красным отмечены места боёв.", heroImage: "" },
     timeline: { kicker: "События", title: "Хронология", lead: "Что уже произошло в мире игры.", heroImage: "" },
     characters: { kicker: "Реестр героев", title: "Персонажи", lead: "Выберите команду, чтобы увидеть её состав.", heroImage: "", tabList: "Герои", tabWeb: "Карта связей" },
     players: { kicker: "Состав", title: "Игроки", lead: "Все, кто играет в Reborn Y. Нажмите на героя, чтобы открыть его команду.", heroImage: "" },
@@ -1344,7 +1352,8 @@ const DEFAULTS = /*DEFAULTS-START*/{
   ],
   cityMap: {
     districts: [{"n": "Деловой центр", "t": "Корпорации", "d": "Самые высокие башни в городе принадлежат корпорациям, и свет в их окнах не гаснет. Улицы внизу общие, а вот возможности у людей на них очень разные."}, {"n": "Мэрия", "t": "Власти", "d": "Закон один для всех, и в мэрии любят это повторять. Законы о суперах пишут здесь, а исполняют на улицах. Мэр обедает с директорами корпораций чаще, чем с горожанами."}, {"n": "Технопарк", "t": "Корпорации", "d": "Лаборатории сыворотки. По бумагам любой может записаться в добровольцы, но записываются те, кому нечего терять."}, {"n": "Порт", "t": "Рабочий район", "d": "Доки и склады. Через порт в город везут поддельную сыворотку, и покупают её те, кому настоящая не по карману."}, {"n": "Старый город", "t": "Жилой район", "d": "Кварталы времён первых суперов. Половину домов отстраивали после чужих драк, и не по одному разу."}, {"n": "Спальные районы", "t": "Жилой район", "d": "Миллионы людей без сил. Работают на корпорации, боятся суперов и надеются, что следующий бой пройдёт мимо их улицы."}, {"n": "Низы", "t": "Рабочий район · Зона бедствия", "d": "Район после большого боя. Скорые сюда не едут, герои прилетают поздно, а злодеи остаются жить."}, {"n": "Башня героев", "t": "Герои", "d": "Вторая по высоте башня города. Отсюда герои видят всё вокруг и сами решают, когда прилететь и кого спасать."}],
-    incidents: [{"n": "Бой в Низах", "t": "Погибло 214 · спасено 37", "d": "Два супера дрались четыре часа. Квартал так и не восстановили, а страховку выплатили только корпоративным складам."}, {"n": "Обрушение на Северной", "t": "Погибло 12 · спасено 40", "d": "Герой удержал падающий дом и вывел сорок человек. До соседнего дома он не успел."}, {"n": "Пожар на рынке", "t": "Погибло 6 · спасено 118", "d": "Злодей поджёг рынок, чтобы отвлечь полицию от банка. Банк ограбить не удалось."}]
+    incidents: [{"n": "Бой в Низах", "t": "Погибло 214 · спасено 37", "d": "Два супера дрались четыре часа. Квартал так и не восстановили, а страховку выплатили только корпоративным складам."}, {"n": "Обрушение на Северной", "t": "Погибло 12 · спасено 40", "d": "Герой удержал падающий дом и вывел сорок человек. До соседнего дома он не успел."}, {"n": "Пожар на рынке", "t": "Погибло 6 · спасено 118", "d": "Злодей поджёг рынок, чтобы отвлечь полицию от банка. Банк ограбить не удалось."}],
+    marks: []
   },
   timeline: [
     { date: "Год 0", title: "Событие", text: "Короткое описание события." },
@@ -1596,6 +1605,11 @@ function normalize(d){
   }
   if (Array.isArray(d.world)) o.world = d.world.filter(Boolean).map(r => ({id: str(r.id), title: str(r.title), text: str(r.text), body: str(r.body), body2: str(r.body2), wide1: str(r.wide1), sq1: str(r.sq1), sq2: str(r.sq2), wide2: str(r.wide2)}));
   if (d.cityMap && typeof d.cityMap === "object") for (const k of ["districts", "incidents"]) if (Array.isArray(d.cityMap[k])) o.cityMap[k].forEach((r, i) => { const x = d.cityMap[k][i]; if (x && typeof x === "object") for (const f of ["n", "t", "d"]) r[f] = str(x[f], r[f]); });
+  if (d.cityMap && Array.isArray(d.cityMap.marks)) o.cityMap.marks = d.cityMap.marks.filter(m => m && typeof m === "object").slice(0, 60).map(m => {
+    const nn = (v, lo, hi) => typeof v === "number" && isFinite(v) ? Math.max(lo, Math.min(hi, v)) : 0;
+    return {id: str(m.id) || ("mk" + Math.random().toString(36).slice(2, 8)), n: str(m.n).slice(0, 120), t: str(m.t).slice(0, 160), d: str(m.d).slice(0, 4000),
+      x: nn(m.x, -100, 100), z: nn(m.z, -64, 64), k: ["", "corp", "hot", "scar"].includes(m.k) ? m.k : ""};
+  });
   if (Array.isArray(d.timeline)) o.timeline = d.timeline.filter(Boolean).map(r => ({date: str(r.date), title: str(r.title), text: str(r.text)}));
   if (Array.isArray(d.faq)) o.faq = d.faq.filter(Boolean).map(f => ({q: str(f.q), a: str(f.a)}));
   if (d.stats && Array.isArray(d.stats.names) && d.stats.names.length >= 3){
@@ -4018,7 +4032,8 @@ const CM_POS = {
       {x: -58, z: -26, y: 14, k: ""}, {x: -56, z: 32, y: 24, k: ""}, {x: 12, z: 38, y: 12, k: "hot"}, {x: -34, z: -18, y: 58, k: ""}],
   s: [{x: 6, z: 42, r: 9}, {x: -44, z: 22, r: 6}, {x: -66, z: -14, r: 5}]
 };
-let cmSel = {s: 0, i: 0}, cmFocus = false, cmCtl = null, threeP = null;
+let cmSel = {s: 0, i: 0}, cmFocus = false, cmCtl = null, threeP = null, cmPlacing = false;
+const CM_KINDS = [["", "Обычная метка"], ["corp", "Корпорация (красная)"], ["hot", "Зона бедствия (красная)"], ["scar", "Место боя (кратер на карте)"]];
 function loadThree(){
   if (window.THREE) return Promise.resolve(window.THREE);
   if (threeP) return threeP;
@@ -4035,8 +4050,8 @@ function cmColor(name, fb){
   let v = ""; try{ v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }catch(e){}
   try{ const g = document.createElement("canvas").getContext("2d"); g.fillStyle = "#000"; g.fillStyle = v || fb; const c = g.fillStyle; return /^#[\da-f]{6}$/i.test(c) ? c : fb; }catch(e){ return fb; }
 }
-function mountCityMap(THREE, stage, canvas, needle, pins, spins, ST){
-  var city = stage, D = CM_POS.d, SC = CM_POS.s, off = [], dead = false, kick = function(){};
+function mountCityMap(THREE, stage, canvas, needle, pins, spins, mpins, MK, ST){
+  var city = stage, D = CM_POS.d, SC = CM_POS.s, SCA = SC.concat(MK.filter(function(m){return m.k==="scar";}).map(function(m){return {x:m.x,z:m.z,r:6};})), off = [], dead = false, kick = function(){};
   var calm = matchMedia("(prefers-reduced-motion:reduce)").matches;
   function L(ev, fn, o){ addEventListener(ev, fn, o); off.push(function(){ removeEventListener(ev, fn, o); }); }
   var seed = 7; function RAND(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
@@ -4052,7 +4067,7 @@ function inside(x,z){var c=false;for(var i=0,j=7;i<8;j=i++){var a=OCT[i],b=OCT[j
 function riverZ(x){return -30+x*.3+6*Math.sin(x/16);}
 function inBay(x,z){return x*.55+z>78;}
 function water(x,z,pad){pad=pad||0;return Math.abs(z-riverZ(x))<4+pad||inBay(x-pad,z-pad);}
-function scarAt(x,z){for(var i=0;i<SC.length;i++){if(Math.hypot(x-SC[i].x,z-SC[i].z)<SC[i].r)return SC[i];}return null;}
+function scarAt(x,z){for(var i=0;i<SCA.length;i++){if(Math.hypot(x-SCA[i].x,z-SCA[i].z)<SCA[i].r)return SCA[i];}return null;}
 function district(x,z){var b=0,bd=1e9;D.forEach(function(d,i){var dd=(d.x-x)*(d.x-x)+(d.z-z)*(d.z-z);if(dd<bd){bd=dd;b=i;}});return b;}
 
 // фасады с окнами
@@ -4119,7 +4134,7 @@ function plat(x,z,r,y,col){var g=new THREE.CylinderGeometry(r,r*.94,1.6,8,1,fals
 var under=[];
 
 // кратеры от боёв
-SC.forEach(function(s){var c=new THREE.Mesh(new THREE.CircleGeometry(s.r,28),new THREE.MeshBasicMaterial({color:0x050505}));c.rotation.x=-Math.PI/2;c.position.set(s.x,.16,s.z);scene.add(c);
+SCA.forEach(function(s){var c=new THREE.Mesh(new THREE.CircleGeometry(s.r,28),new THREE.MeshBasicMaterial({color:0x050505}));c.rotation.x=-Math.PI/2;c.position.set(s.x,.16,s.z);scene.add(c);
   var ring=[];for(var i=0;i<40;i++){var a=i/40*6.283,b=(i+1)/40*6.283;ring.push(s.x+Math.cos(a)*s.r,.2,s.z+Math.sin(a)*s.r,s.x+Math.cos(b)*s.r,.2,s.z+Math.sin(b)*s.r);}
   var g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(ring,3));scene.add(new THREE.LineSegments(g,new THREE.LineBasicMaterial({color:RED,transparent:true,opacity:.9})));});
 // смог над городом
@@ -4183,8 +4198,8 @@ function frame(ts){
   var dt=Math.min(.05,(ts-(last||ts))/1000);last=ts;t+=dt;
   var vis=city.getBoundingClientRect();if(vis.bottom<0||vis.top>innerHeight){run=false;last=0;return;}
   if(!calm&&ts-ST.userT>5000)yawT+=dt*.035;
-  var d=ST.sel.s?SC[ST.sel.i]:D[ST.sel.i],ft=ST.focus?new THREE.Vector3(d.x,ST.sel.s?0:(d.k==="corp"?16:ST.sel.i===7?24:0),d.z):new THREE.Vector3(6,8,4);
-  distT=(ST.focus?base*(ST.sel.s?.32:.45):base)/ST.zoomT;
+  var d=(ST.sel.s===2?MK[ST.sel.i]:ST.sel.s?SC[ST.sel.i]:D[ST.sel.i])||D[0],ft=ST.focus?new THREE.Vector3(d.x,ST.sel.s?0:(d.k==="corp"?16:ST.sel.i===7?24:0),d.z):new THREE.Vector3(6,8,4);
+  distT=(ST.focus?base*(ST.sel.s===1?.32:ST.sel.s===2?.4:.45):base)/ST.zoomT;
   var k=calm?1:1-Math.pow(.02,dt);yaw+=(yawT-yaw)*k;dist+=(distT-dist)*k;tgt.lerp(ft,k);
   var pol=(ST.focus?.78:.72)-(cam.aspect<1?.12:0);scene.fog.near=dist*.75;scene.fog.far=dist*2.4;
   cam.position.set(tgt.x+Math.sin(yaw)*Math.sin(pol)*dist,Math.cos(pol)*dist,tgt.z+Math.cos(yaw)*Math.sin(pol)*dist);cam.lookAt(tgt);
@@ -4197,7 +4212,7 @@ function frame(ts){
   renderer.render(scene,cam);
   function place(el,x,y,z){v3.set(x,y,z).project(cam);var off=v3.z>1||Math.abs(v3.x)>1.1||Math.abs(v3.y)>1.1;
     el.style.transform="translate("+((v3.x+1)/2*W)+"px,"+((1-v3.y)/2*H)+"px) translate(-13px,-50%)";el.style.visibility=off?"hidden":"visible";}
-  D.forEach(function(d,i){place(pins[i],d.x,d.y,d.z);});SC.forEach(function(s,i){place(spins[i],s.x,4,s.z);});
+  D.forEach(function(d,i){place(pins[i],d.x,d.y,d.z);});SC.forEach(function(s,i){place(spins[i],s.x,4,s.z);});MK.forEach(function(m,i){if(mpins[i])place(mpins[i],m.x,m.k==="scar"?4:8,m.z);});
   if(calm&&Math.abs(yawT-yaw)<.001&&Math.abs(distT-dist)<.05){run=false;return;}
   requestAnimationFrame(frame);
 }
@@ -4215,7 +4230,9 @@ function dispose(){
   if(dead)return;dead=true;off.forEach(function(f){f();});
   try{scene.traverse(function(o){if(o.geometry)o.geometry.dispose();if(o.material)[].concat(o.material).forEach(function(m){if(m.map)m.map.dispose();m.dispose();});});renderer.dispose();if(renderer.forceContextLoss)renderer.forceContextLoss();}catch(e){}
 }
-return {kick:function(){kick();},zoom:zoomBy,dispose:dispose};
+function groundAt(cx,cy){var r=city.getBoundingClientRect();cam.updateMatrixWorld();var rc=new THREE.Raycaster();rc.setFromCamera(new THREE.Vector2((cx-r.left)/r.width*2-1,-((cy-r.top)/r.height*2-1)),cam);
+  var o=rc.ray.origin,dr=rc.ray.direction;if(dr.y>-1e-4)return null;var tt=-o.y/dr.y;return {x:o.x+dr.x*tt,z:o.z+dr.z*tt};}
+return {kick:function(){kick();},zoom:zoomBy,ground:groundAt,dispose:dispose};
 }
 function cmPin(cls, label, kind, name, fn){
   const b = h("button", {class: "cm-pin " + cls + " " + kind, type: "button", "aria-label": name, onclick: e => { e.stopPropagation(); fn(); }},
@@ -4228,19 +4245,26 @@ function viewMap(){
   const msg = h("div", {class: "cm-msg"}, "Загружаем карту…");
   const ST = {sel: cmSel, focus: cmFocus, userT: 0, zoomT: 1};
   let ctl = null;
+  const MK = M.marks;
+  if (cmSel.s === 2 && !MK[cmSel.i]){ cmSel = {s: 0, i: 0}; cmFocus = false; ST.sel = cmSel; ST.focus = false; }
   const pins = D.map((d, i) => cmPin("", i + 1, CM_POS.d[i].k, d.n, () => toggle(0, i)));
+  const mpins = MK.map((m, i) => cmPin(m.k === "scar" ? "scar" : "", m.k === "scar" ? "×" : "•", m.k === "scar" ? "" : m.k, m.n || "Метка", () => toggle(2, i)));
   const spins = SC.map((d, i) => cmPin("scar", "×", "", d.n, () => toggle(1, i)));
-  pins.concat(spins).forEach(p => pinsEl.append(p));
+  pins.concat(spins, mpins).forEach(p => pinsEl.append(p));
   const body = h("div", {class: "cm-body"});
-  const syncPins = () => { pins.forEach((p, i) => { p.querySelector(".l").textContent = D[i].n; p.setAttribute("aria-label", D[i].n); }); spins.forEach((p, i) => { p.querySelector(".l").textContent = SC[i].n; p.setAttribute("aria-label", SC[i].n); }); };
-  const mark = () => { pins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 0 && k === cmSel.i)); spins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 1 && k === cmSel.i)); };
+  const syncPins = () => { pins.forEach((p, i) => { p.querySelector(".l").textContent = D[i].n; p.setAttribute("aria-label", D[i].n); }); spins.forEach((p, i) => { p.querySelector(".l").textContent = SC[i].n; p.setAttribute("aria-label", SC[i].n); }); mpins.forEach((p, i) => { p.querySelector(".l").textContent = MK[i].n || "Метка"; p.setAttribute("aria-label", MK[i].n || "Метка"); }); };
+  const mark = () => { pins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 0 && k === cmSel.i)); spins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 1 && k === cmSel.i)); mpins.forEach((p, k) => p.classList.toggle("on", cmSel.s === 2 && k === cmSel.i)); };
   function paint(){
-    const scar = cmSel.s === 1, d = scar ? SC[cmSel.i] : D[cmSel.i], k = scar ? "hot" : CM_POS.d[cmSel.i].k;
+    const own = cmSel.s === 2, scar = cmSel.s === 1 || (own && MK[cmSel.i].k === "scar"), d = own ? MK[cmSel.i] : scar ? SC[cmSel.i] : D[cmSel.i], k = own ? (scar ? "hot" : MK[cmSel.i].k) : scar ? "hot" : CM_POS.d[cmSel.i].k;
+    const tools = own && editing ? h("div", {class: "cm-tools"},
+      (() => { const sel = h("select", {"aria-label": "Тип метки"}, CM_KINDS.map(([v, l]) => h("option", {value: v}, l))); sel.value = d.k; sel.onchange = () => change(() => { d.k = sel.value; }); return sel; })(),
+      toolBtn("plus", "Поставить на карте", () => { cmPlacing = true; cmFocus = false; change(() => {}); }),
+      dangerBtn("Удалить метку", () => change(() => { MK.splice(cmSel.i, 1); cmSel = {s: 0, i: 0}; cmFocus = false; }))) : null;
     body.replaceChildren(
-      h("span", {class: "cm-no"}, scar ? "Инцидент" : "Район " + pad(cmSel.i + 1) + " / " + pad(D.length)),
+      h("span", {class: "cm-no"}, own ? "Метка " + pad(cmSel.i + 1) + " / " + pad(MK.length) : scar ? "Инцидент" : "Район " + pad(cmSel.i + 1) + " / " + pad(D.length)),
       ed("h3", {}, () => d.n, v => d.n = v, {ph: "Название", after: syncPins}),
       ed("span", {class: "cm-tag " + k}, () => d.t, v => d.t = v, {ph: "Подпись"}),
-      ed("p", {}, () => d.d, v => d.d = v, {multi: true, ph: "Описание"}));
+      ed("p", {}, () => d.d, v => d.d = v, {multi: true, ph: "Описание"}), tools);
     mark();
   }
   function pick(s, i){
@@ -4256,14 +4280,32 @@ function viewMap(){
     h("button", {type: "button", "aria-label": "Следующий район", onclick: () => pick(0, cmSel.s ? 0 : cmSel.i + 1)}, "→"),
     h("button", {type: "button", class: "all", onclick: showAll}, "Весь город"));
   const stage = h("div", {class: "cm-stage"}, canvas, pinsEl, h("div", {class: "cm-compass", "aria-hidden": "true"}, needle),
-    h("div", {class: "cm-zoom"}, h("button", {type: "button", "aria-label": "Приблизить", onclick: () => ctl && ctl.zoom(1.35)}, "+"), h("button", {type: "button", "aria-label": "Отдалить", onclick: () => ctl && ctl.zoom(1 / 1.35)}, "−")), msg, h("span", {class: "cm-hint"}, "Тяните: повернуть · Ctrl + колесо: приблизить"));
+    h("div", {class: "cm-zoom"}, h("button", {type: "button", "aria-label": "Приблизить", onclick: () => ctl && ctl.zoom(1.35)}, "+"), h("button", {type: "button", "aria-label": "Отдалить", onclick: () => ctl && ctl.zoom(1 / 1.35)}, "−")), msg, h("span", {class: "cm-hint"}, cmPlacing ? "Нажмите на карту, куда поставить метку" : "Тяните: повернуть · Ctrl + колесо: приблизить"));
+  if (cmPlacing && editing){ stage.classList.add("place"); setTimeout(() => { try{ if (stage.isConnected) stage.scrollIntoView({block: "center", behavior: "smooth"}); }catch(e){} }, 60); } else cmPlacing = false;
+  let down = null;
+  stage.addEventListener("pointerdown", e => { down = [e.clientX, e.clientY]; });
+  stage.addEventListener("click", e => {
+    if (!cmPlacing || !ctl || cmSel.s !== 2 || !MK[cmSel.i]) return;
+    if (e.target.closest(".cm-zoom,.cm-compass,.cm-pin")) return;
+    if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return;
+    const g = ctl.ground(e.clientX, e.clientY); if (!g) return;
+    const m = MK[cmSel.i]; cmPlacing = false;
+    change(() => { m.x = Math.max(-100, Math.min(100, Math.round(g.x * 10) / 10)); m.z = Math.max(-64, Math.min(64, Math.round(g.z * 10) / 10)); cmFocus = true; });
+  });
   paint();
-  const root = h("div", {}, pageHead(C.pages.map), h("div", {class: "cm"}, stage, h("div", {class: "cm-card"}, body, nav)),
-    h("p", {class: "cm-legend"}, "Восьмиугольники: районы города. Красные квадраты: места боёв. Красным выделены корпорации и зоны бедствия."));
+  const PM = C.pages.map;
+  if (!document.getElementById("cmfont")){ try{ const l = document.createElement("link"); l.id = "cmfont"; l.rel = "stylesheet"; l.href = "https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&display=swap"; document.head.append(l); }catch(e){} }
+  const hero = h("div", {class: "cm-hero"},
+    ed("span", {class: "cm-bub"}, () => PM.title, v => PM.title = v, {ph: "Надпись", after: render}),
+    ed("h2", {class: "cm-big"}, () => PM.big, v => PM.big = v, {ph: "Заголовок"}),
+    (PM.lead || editing) ? ed("p", {class: "lead"}, () => PM.lead, v => PM.lead = v, {multi: true, ph: "Пояснение"}) : null);
+  const root = h("div", {}, hero, h("div", {class: "cm"}, stage, h("div", {class: "cm-card"}, body, nav)),
+    addBtn("Добавить метку на карту", () => { MK.push({id: "mk" + uid(), n: "Новая метка", t: "Подпись", d: "Описание метки.", x: 0, z: 0, k: ""}); cmSel = {s: 2, i: MK.length - 1}; cmFocus = false; cmPlacing = true; }),
+    h("p", {class: "cm-legend"}, "Восьмиугольники: районы города. Красные квадраты: места боёв. Красным выделены корпорации и зоны бедствия." + (editing ? " Свои метки: кнопка «Добавить метку», затем клик по карте." : "")));
   loadThree().then(T => {
     if (!stage.isConnected) return;
     if (cmCtl) cmCtl.dispose();
-    ctl = cmCtl = mountCityMap(T, stage, canvas, needle, pins, spins, ST);
+    ctl = cmCtl = mountCityMap(T, stage, canvas, needle, pins, spins, mpins, MK, ST);
     msg.hidden = true;
   }).catch(() => { msg.textContent = "Карта не открылась: нужен интернет и браузер с 3D (WebGL)."; pinsEl.hidden = true; });
   return root;
@@ -4394,7 +4436,7 @@ function buildIndex(){
   add("plot", C.pages.nav.title + " · " + C.pages.plot.title, C.pages.plot.title, C.plotText);
   C.plot.forEach(p => out.push({tab: "plot", label: C.pages.nav.title + " · " + C.pages.plot.title, title: p.title || p.kind || "Запись", text: [p.kind, p.text, plain(p.head), plain(p.body), plain(p.long)].join(" "), target: "plot"}));
   C.world.forEach(x => out.push({tab: "world", label: C.pages.nav.title + " · " + C.pages.world.title, title: x.title, text: [x.text, x.body, x.body2].join(" "), target: "world/" + idOf(x)}));
-  C.cityMap.districts.concat(C.cityMap.incidents).forEach(x => out.push({tab: "map", label: C.pages.nav.title + " · " + C.pages.map.title, title: x.n, text: [x.t, x.d].join(" "), target: "map"}));
+  C.cityMap.districts.concat(C.cityMap.incidents, C.cityMap.marks).forEach(x => out.push({tab: "map", label: C.pages.nav.title + " · " + C.pages.map.title, title: x.n, text: [x.t, x.d].join(" "), target: "map"}));
   C.teams.forEach(t => { out.push({tab: "characters", label: "Персонажи", title: t.name, text: t.about, target: "team/" + idOf(t)}); t.chars.forEach(c => out.push({tab: "characters", label: "Персонажи · " + t.name, title: c.name + (c.alias ? " · " + c.alias : ""), text: [c.alias, c.age, c.power, c.desc, c.player, c.story, c.story2].join(" "), target: "char/" + idOf(c)})); });
   C.rules.forEach(r => add("rules", "Правила", r.title, r.text));
   const SECN = {occ: "Занятые персонажи", ban: "Запрещённые внешности", job: "Биржа труда", act: "Проверка активности"};
