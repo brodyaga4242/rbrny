@@ -5969,7 +5969,7 @@ function ghLogout(){
   location.href = location.pathname;
 }
 /* Запертый токен: строка из seal.html (salt|iv|шифр, base64). Пароль открывает её только в браузере; пусто — вход по токену вручную. */
-const GH_SEALED = "npVB5KHp1UbRFuWwQxp03VWtpNreWW1Jji3QG67QI97EUd5P0OMs5BAf1mvOT/0V0SD91fL38OdrwwRuB2nUp7/+FWxD4Vnz7aESAYVYypoQp2Ryx5vy7ZLM1qYfczJoL3aQzLuR7f+BIyqJePuTHwiG87lEpfJ4j4S8iO67d1caHljc4xBpefVC9gKzrwpM7PwV3OopHg/H+ZOdbfuPl84ORlxogQeErXugxDY2+YJbpYEhFg0cfjji5qnS3VfbYg==";
+const GH_SEALED = "aclbV2Fjg3E+6+n0yva3h5KsR+mUpcLSqCbc9Zkn5DX6VvyR2heVbQFnL2BquN2T0wMtImGjOPGpHGsu6NJTlYVkZBqQpd0HCBmTHLOzhK3loVX2f8iiemzYM8cSUlQjJseC9SujkcxgBIjJoQ3xGewM4uaBwDqeMceM0R5c9kphu9uTdYRyaajvEifG+vnwbTBs9T1y5Ug6nUfrJk2GgTRySmMbj4rngC4og5O91v9AyQ7ixsBvRP+uEc7Lql7dMA==";
 const b64u = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
 async function ghUnseal(pass){
   const raw = b64u(GH_SEALED), salt = raw.slice(0, 16), iv = raw.slice(16, 28);
