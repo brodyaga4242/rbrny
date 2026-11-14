@@ -4550,7 +4550,11 @@ function roadAd(ti,x,z){fbox(x-1,0,z,.2,5,.2,G(.4));fbox(x+1,0,z,.2,5,.2,G(.4));
   for(i=0;i<380;i++){var px=rnd(8,18),pz=9.9+Math.pow(RAND(),1.7)*8.2;if(hyp(px-x,pz-z)<1.7)continue;crowdA.push(px,.35,pz);}
   for(i=0;i<6;i++){lampA.push(7.8+i*2.08,1.1,18.3,7.8,1.1,7.8+i*2.08,18.2,1.1,7.8+i*2.08);}
   quad(glowP,9.3,7.6,16.7,12.4,.07);quad(glowP,13.8,9.3,18.4,16.7,.072);
-  roadAd(0,-39,2.3);roadAd(1,65,-2.3);})();
+  roadAd(0,-39,2.3);roadAd(1,65,-2.3);
+  // большие щиты у трасс за городом: у западной (рядом с тюрьмой) и у северной
+  [[0,-112,-3.2,0],[1,55.4,-122,1]].forEach(function(a){var ti=a[0],x=a[1],z=a[2],r=a[3];if(r){fbox(x,0,z-1.4,.26,6,.26,G(.4));fbox(x,0,z+1.4,.26,6,.26,G(.4));adScreen(ti,x,8.6,z,4.4,5.4,Math.PI/2);adScreen(ti,x,8.6,z,4.4,5.4,-Math.PI/2);}
+    else{fbox(x-1.4,0,z,.26,6,.26,G(.4));fbox(x+1.4,0,z,.26,6,.26,G(.4));adScreen(ti,x,8.6,z,4.4,5.4,0);adScreen(ti,x,8.6,z,4.4,5.4,Math.PI);}
+    reds.push([x,11.6,z]);});})();
 
 // ---------- сборка геометрии ----------
 function mesh(k,mat){var b=B[k];if(!b)return;
@@ -4860,7 +4864,7 @@ var streetA=[];(function(){var x,z,ix,iz;
   for(ix=-20;ix<=20;ix+=ROAD)for(z=-15*STEP;z<15*STEP;z+=1.75){x=ix*STEP;var hw=ix%10===0?1.7:1.15;if(!inside(x,z)||water(x,z,.6)||canal(x,z)||inBay(x,z))continue;streetA.push(x-hw-.35,.75,z,x+hw+.35,.75,z+.87);}
   for(iz=-15;iz<=15;iz+=ROAD)for(x=-22*STEP;x<22*STEP;x+=1.75){z=iz*STEP;var hw2=iz===0?1.7:1.15;if(!inside(x,z)||water(x,z,.6)||canal(x,z)||inBay(x,z))continue;streetA.push(x,.75,z-hw2-.35,x+.87,.75,z+hw2+.35);}
   for(var i=0;i<RING.length;i++){var a=RING[i];if(!water(a.x,a.z)&&!canal(a.x,a.z))streetA.push(a.x,.75,a.z);}})();
-pts(streetA,0xffdcb0,.95,.6);
+(function(){var c=[],b=[];for(var i=0;i<streetA.length;i+=3){c.push(1,.74,.44);b.push(1);}farPts(streetA,c,b,1.6);})();
 function animFar(tt,dt){var a=fcP.geometry.attributes.position;FC.forEach(function(c,i){c.s+=c.v*dt*c.d;if(c.s>c.p.T)c.s-=c.p.T;if(c.s<0)c.s+=c.p.T;fwyAt(c.p,c.s,tmp4);var o=c.d>0?.9:-.9;a.setXYZ(i,tmp4[0]-tmp4[3]*o,.6,tmp4[1]+tmp4[2]*o);});a.needsUpdate=true;
   var us=H*(renderer.getPixelRatio?renderer.getPixelRatio():1);farMats.forEach(function(m){m.uniforms.uS.value=us;});}
 var polR=[],polW=[];for(var pi2=0;pi2<polL.length;pi2+=6){polR.push(polL[pi2],polL[pi2+1],polL[pi2+2]);polW.push(polL[pi2+3],polL[pi2+4],polL[pi2+5]);}
