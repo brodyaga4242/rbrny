@@ -763,8 +763,8 @@ body.lbx-open{overflow:hidden}
 .wc{display:flex;flex-direction:column;border:1px solid var(--line);background:var(--panel);transition:background .2s}
 .wc:nth-child(4n+1){--c:var(--yel);--ci:var(--blk)}.wc:nth-child(4n+2){--c:var(--red);--ci:#fff}.wc:nth-child(4n+3){--c:var(--blue);--ci:#fff}.wc:nth-child(4n){--c:var(--cream);--ci:var(--blk)}
 .wc:hover{background:var(--raise)}
-.wc-cover{display:grid;place-items:center;aspect-ratio:16/9;padding:0;border:0;overflow:hidden;background:var(--c);color:var(--ci);font:300 64px/1 var(--display);cursor:pointer}
-.wc-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.wc-cover{position:relative;display:grid;place-items:center;aspect-ratio:16/9;padding:0;border:0;overflow:hidden;background:var(--c);color:var(--ci);font:300 64px/1 var(--display);cursor:pointer}
+.wc-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--c)}
 .wc-body{display:flex;flex-direction:column;gap:12px;flex:1;padding:20px 22px 22px}
 .wc h3{margin:0;font-size:24px;line-height:1.15}.wc p{margin:0;color:var(--muted);white-space:pre-line}
 .wc-go{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:auto;padding:0 0 4px;border:0;border-bottom:1px solid var(--yel);background:none;color:var(--ink);font:500 12px/1.2 var(--body);text-transform:uppercase;letter-spacing:.12em;cursor:pointer}
@@ -1753,7 +1753,7 @@ function normalize(d){
     });
     o.plot = hadSample ? mine.concat(o.plot) : mine;
   }
-  if (Array.isArray(d.world)) o.world = d.world.filter(Boolean).map(r => ({id: str(r.id), title: str(r.title), text: str(r.text), body: str(r.body), body2: str(r.body2), wide1: str(r.wide1), sq1: str(r.sq1), sq2: str(r.sq2), wide2: str(r.wide2)}));
+  if (Array.isArray(d.world)) o.world = d.world.filter(Boolean).map(r => ({id: str(r.id), title: str(r.title), text: str(r.text), body: str(r.body), body2: str(r.body2), cover: str(r.cover, str(r.wide1)), wide1: str(r.wide1), sq1: str(r.sq1), sq2: str(r.sq2), wide2: str(r.wide2)}));
   if (d.cityMap && typeof d.cityMap === "object") for (const k of ["districts", "incidents"]) if (Array.isArray(d.cityMap[k])) o.cityMap[k].forEach((r, i) => { const x = d.cityMap[k][i]; if (x && typeof x === "object") for (const f of ["n", "t", "d"]) r[f] = str(x[f], r[f]); });
   if (d.cityMap && d.cityMap.screens && typeof d.cityMap.screens === "object") for (const k of ["a", "b"]) o.cityMap.screens[k] = str(d.cityMap.screens[k]);
   if (d.cityMap && d.cityMap.signs && typeof d.cityMap.signs === "object") for (const k in o.cityMap.signs) o.cityMap.signs[k] = str(d.cityMap.signs[k], o.cityMap.signs[k]).slice(0, 300);
@@ -2227,7 +2227,7 @@ function pickImage(obj, field, max){
         obj[field] = await toDataUrl(await shrink(f, Math.min(max, 1400), true));
       }
       renderAll();
-      if (await saveNow()){ if (assetsApi && isAsset(old)) assetsApi.delete(old).catch(() => {}); toast("Картинка обновлена."); }
+      if (await saveNow()){ if (assetsApi && isAsset(old) && !Object.values(obj).includes(old)) assetsApi.delete(old).catch(() => {}); toast("Картинка обновлена."); }
     }catch(e){ toast(uploadError(e)); }
     finally{ pendingRemote = null; release(); }
   };
@@ -2239,7 +2239,7 @@ function imgButtons(obj, field, label, max, strong){
   return [
     h("button", {class: cls, type: "button", onclick: e => { e.stopPropagation(); pickImage(obj, field, max); }}, icon("camera"), label),
     obj[field] ? h("button", {class: cls, type: "button", "aria-label": "Убрать картинку", title: "Убрать картинку",
-      onclick: async e => { e.stopPropagation(); const old = obj[field]; obj[field] = ""; renderAll(); if (await saveNow() && assetsApi && isAsset(old)) assetsApi.delete(old).catch(() => {}); }}, icon("x")) : null
+      onclick: async e => { e.stopPropagation(); const old = obj[field]; obj[field] = ""; renderAll(); if (await saveNow() && assetsApi && isAsset(old) && !Object.values(obj).includes(old)) assetsApi.delete(old).catch(() => {}); }}, icon("x")) : null
   ];
 }
 
@@ -4188,17 +4188,20 @@ function viewWorld(){
   if (worldOpen >= 0) return viewWorldArticle(A, worldOpen);
   return h("div", {}, pageHead(C.pages.world),
     A.length ? h("div", {class: "wlist"}, A.map((c, i) => {
-      const src = srcOf(c.wide1);
+      const src = srcOf(c.cover);
       return h("article", {class: "wc"},
         h("button", {class: "wc-cover", type: "button", "aria-label": "Открыть: " + (c.title || ""), onclick: () => openWorld(i)},
-          src ? h("img", {src, alt: "", loading: "lazy", onerror: e => e.target.remove()}) : h("span", {}, pad(i + 1))),
+          h("span", {"aria-hidden": "true"}, pad(i + 1)),
+          src ? h("img", {src, alt: "", loading: "lazy", onerror: e => e.target.remove()}) : null),
         h("div", {class: "wc-body"},
           ed("h3", {}, () => c.title, v => c.title = v, {ph: "Название"}),
           ed("p", {}, () => c.text, v => c.text = v, {multi: true, ph: "Короткое описание"}),
           h("button", {class: "wc-go", type: "button", onclick: () => openWorld(i)}, editing ? "Открыть и наполнить" : "Читать", icon("arrow")),
+          editing ? h("div", {class: "rowtools", role: "group", "aria-label": "Обложка: " + c.title},
+            ...imgButtons(c, "cover", c.cover ? "Заменить обложку" : "Загрузить обложку", 1600)) : null,
           rowTools(A, i)));
     })) : h("div", {class: "empty"}, "Информация о мире пока не добавлена."),
-    addBtn("Добавить пункт", () => A.push({id: uid(), title: "Новый пункт", text: "Короткое описание.", body: "", body2: "", wide1: "", sq1: "", sq2: "", wide2: ""})));
+    addBtn("Добавить пункт", () => A.push({id: uid(), title: "Новый пункт", text: "Короткое описание.", body: "", body2: "", cover: "", wide1: "", sq1: "", sq2: "", wide2: ""})));
 }
 /* ---------- хронология: ползунок по датам и «экранчик» события ---------- */
 let tlSel = 0, tlList = false;
