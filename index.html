@@ -618,6 +618,9 @@ html.no-pieces .hero-in::after{display:none}
 .pl-band{position:absolute;top:0;bottom:0}
 .pl-band.b0{background:color-mix(in srgb,var(--ink) 7%,transparent)}
 .pl-band.b1{background:color-mix(in srgb,var(--ink) 14%,transparent)}
+.pl-boundary{position:absolute;top:0;height:75px;width:16px;transform:translateX(-50%);cursor:ew-resize;touch-action:none}
+.pl-boundary::after{content:"";position:absolute;inset:0 7px;background:var(--muted)}
+.pl-boundary:hover::after,.pl-boundary.drag::after{background:var(--gold)}
 .pl-lab{position:absolute;top:6px;overflow:hidden;box-sizing:border-box;padding:0 6px;font:600 10px/1.2 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);pointer-events:none;overflow-wrap:anywhere}
 .pl-lab.r2{top:var(--r2,36px);padding:0 4px;white-space:nowrap}
 .pl-tk{position:absolute;width:14px;height:14px;margin-left:-7px;padding:0;border-radius:50%;border:2px solid var(--bg);cursor:pointer;transition:transform .2s}
@@ -637,7 +640,6 @@ html.no-pieces .hero-in::after{display:none}
 .pl-btn:disabled{opacity:.35;cursor:default}
 .pl-eraintro{margin-top:22px;display:grid;gap:8px}
 .pl-intro{max-width:70ch;color:var(--muted);font-size:15px;line-height:1.7}
-.pl-eraname{font:600 12px/1.3 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-text)}
 .pl-rdr{display:grid;grid-template-columns:minmax(0,1fr);min-width:0;gap:12px;margin-top:22px;padding:clamp(18px,3.5vw,40px);background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--vc);animation:plIn .45s cubic-bezier(.2,.8,.2,1)}
 @keyframes plIn{from{opacity:0;transform:translateY(16px)}}
 .pl-no{font:400 11px/1.5 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
@@ -679,6 +681,8 @@ html.no-pieces .hero-in::after{display:none}
 .pl-edit select,.pl-edit input{max-width:100%;padding:6px 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;font-size:14px}
 .pl-edit input{width:90px}
 .pl-edit input[type=text]{width:240px}
+.pl-eras-editor{display:grid;gap:8px;margin:16px 0}
+.pl-eras-editor .pl-edit{padding:8px 0;border-bottom:1px solid var(--line)}
 .pl-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
 .pl-gitem{display:grid;gap:6px;align-content:start}
 .pl-gi{box-shadow:0 6px 18px rgba(0,0,0,.35)}
@@ -4000,6 +4004,56 @@ function plEditPanel(c){
     mk("Вёрстка текста", laySel(c)), mk("Вид", formSel(c)), mk("Источник", viewSel(c)), mk("Лет назад", num),
     dangerBtn("Удалить документ", () => change(() => { P.splice(P.indexOf(c), 1); plSel = ""; })));
 }
+function plErasEditor(E){
+  const canAdd = E.length < 30;
+  return h("section", {class: "pl-eras-editor", "aria-label": "Эпохи на шкале"},
+    h("h3", {}, "Эпохи на шкале"),
+    h("p", {class: "pl-n"}, "Ширина эпохи задаётся в годах. При изменении ширины сдвигается её начальная граница."),
+    E.map((era, k) => {
+      const prev = E[k - 1];
+      const max = (prev ? prev.from - 1 : 999) - era.to;
+      const name = h("input", {type: "text", maxlength: "60", required: true, value: era.name});
+      const years = h("input", {type: "number", min: "1", max: String(max), step: "1", required: true, value: String(era.from - era.to)});
+      return h("form", {class: "pl-edit", onsubmit: event => {
+        event.preventDefault();
+        const title = name.value.trim(), duration = years.valueAsNumber;
+        if (!title || !Number.isInteger(duration) || duration < 1 || duration > max) return;
+        change(() => {
+          era.name = title;
+          era.from = era.to + duration;
+          if (prev) prev.to = era.from;
+        });
+      }},
+      h("label", {}, "Название эпохи", name),
+      h("label", {}, "Ширина, лет", years),
+      h("button", {class: "pl-btn", type: "submit"}, "Применить"),
+      canAdd && era.from - era.to >= 2 ? h("button", {class: "pl-btn", type: "button", onclick: () => change(() => {
+        const mid = Math.round((era.from + era.to) / 2);
+        E.splice(k + 1, 0, {name: "Новая эпоха", intro: "", from: mid, to: era.to});
+        era.to = mid;
+      })}, "Разделить и добавить эпоху") : null,
+      E.length > 1 ? dangerBtn("Удалить эпоху", () => change(() => {
+        if (prev) prev.to = era.to;
+        else E[1].from = era.from;
+        E.splice(k, 1);
+      })) : null);
+    }),
+    plEndEditor(E[E.length - 1]),
+    canAdd && E[0].from < 999 ? addBtn("Добавить эпоху в начало шкалы", () => {
+      const to = E[0].from;
+      E.unshift({name: "Новая эпоха", intro: "", from: Math.min(999, to + 10), to});
+    }) : null,
+    !canAdd ? h("p", {class: "pl-n"}, "На шкалу можно добавить до 30 эпох.") : null);
+}
+function plEndEditor(last){
+  const end = h("input", {type: "number", min: "0", max: String(last.from - 1), step: "1", required: true, value: String(last.to)});
+  return h("form", {class: "pl-edit", onsubmit: event => {
+    event.preventDefault();
+    change(() => { last.to = end.valueAsNumber; });
+  }},
+  h("label", {}, "Конец шкалы, лет назад", end),
+  h("button", {class: "pl-btn", type: "submit"}, "Применить"));
+}
 function viewPlot(){
   const P = C.plot, E = C.plotEras;
   const top = [
@@ -4009,31 +4063,44 @@ function viewPlot(){
     const c = {id: uid(), kind: "Газета", title: "Новый документ", text: "Короткое описание.", img: "", anim: "rise", ago: Math.round(plAgo), view: "people", form: "paper", head: "Заголовок документа", body: "Текст документа.", long: "Полный текст документа."};
     P.push(c); plSel = c.id;
   });
-  if (!P.length) return h("div", {class: "plot"}, top, h("div", {class: "empty"}, "Документов пока нет."), addDoc);
+  const erasEditor = editing ? plErasEditor(E) : null;
+  if (!P.length && !editing) return h("div", {class: "plot"}, top, h("div", {class: "empty"}, "Документов пока нет."));
   const order = () => P.map((_, i) => i).sort((a, b) => P[b].ago - P[a].ago || a - b);
   const nearest = a => { let b = 0; P.forEach((c, i) => { if (Math.abs(c.ago - a) < Math.abs(P[b].ago - a)) b = i; }); return b; };
   let cur = P.findIndex(c => c.id === plSel);
   if (cur < 0) cur = nearest(plAgo);
   else if (nearest(plAgo) !== cur) plAgo = P[cur].ago;
-  plSel = P[cur].id;
-  /* шкала сжимается под нужный отрезок: в просмотре пустые эпохи по краям скрыты, края шкалы берутся из эпох и документов */
-  const has = E.map(() => false); P.forEach(c => { has[plEraOf(E, c.ago)] = true; });
-  let k0 = 0, k1 = E.length - 1;
-  if (!editing){ while (k0 < k1 && !has[k0]) k0++; while (k1 > k0 && !has[k1]) k1--; }
-  let rMax = E[k0].from, rMin = E[k1].to;
+  plSel = P[cur]?.id || "";
+  const last = E.length - 1;
+  let rMax = E[0].from, rMin = E[last].to;
   P.forEach(c => { rMax = Math.max(rMax, c.ago); rMin = Math.min(rMin, c.ago); });
   if (rMax - rMin < 1) rMax = rMin + 1;
   const span = rMax - rMin, pc = a => Math.max(0, Math.min(100, (rMax - a) / span * 100)).toFixed(2);
   plAgo = Math.max(rMin, Math.min(rMax, plAgo));
   /* шкала: сверху подписи эпох, под ними точки документов, внизу линия */
   const track = h("div", {class: "pl-trk"});
-  const vis = E.map((e, k) => k).slice(k0, k1 + 1);
-  const eFrom = k => k === k0 ? rMax : E[k].from, eTo = k => k === k1 ? rMin : E[k].to;
-  const bands = h("div", {class: "pl-bands"}, vis.map(k => h("i", {class: "pl-band b" + (k % 2), style: "left:" + pc(eFrom(k)) + "%;width:" + ((eFrom(k) - eTo(k)) / span * 100).toFixed(2) + "%"})));
-  const labs = vis.map(k => {
-    const w = (eFrom(k) - eTo(k)) / span * 100, narrow = w < 12;
-    return h("span", {class: "pl-lab" + (narrow ? " r2" : ""), style: narrow ? (k === k1 ? "right:0" : "left:" + pc(eFrom(k)) + "%") : "left:" + pc(eFrom(k)) + "%;width:" + w.toFixed(2) + "%"}, E[k].name);
-  });
+  const strips = E.map((_, k) => h("i", {class: "pl-band b" + (k % 2)}));
+  const bands = h("div", {class: "pl-bands"}, strips);
+  const labs = E.map(era => h("span", {class: "pl-lab"}, era.name));
+  const grips = editing ? E.slice(1).map((era, i) => h("div", {
+    class: "pl-boundary", "aria-hidden": "true", title: E[i].name + " / " + era.name
+  })) : [];
+  const paintBands = (boundary, year) => {
+    const start = k => k === 0 ? rMax : k === boundary ? year : E[k].from;
+    E.forEach((_, k) => {
+      const end = k === last ? rMin : k + 1 === boundary ? year : E[k].to;
+      const left = pc(start(k)) + "%", width = (start(k) - end) / span * 100;
+      const narrow = width < 12;
+      strips[k].style.left = left;
+      strips[k].style.width = width + "%";
+      labs[k].classList.toggle("r2", narrow);
+      labs[k].style.left = narrow && k === last ? "" : left;
+      labs[k].style.right = narrow && k === last ? "0" : "";
+      labs[k].style.width = narrow ? "" : width + "%";
+      if (grips[k - 1]) grips[k - 1].style.left = left;
+    });
+  };
+  paintBands();
   const dots = P.map((c, i) => h("button", {class: "pl-tk", type: "button", "aria-label": plain(c.title) || "Документ", style: "left:" + pc(c.ago) + "%;background:" + plView(c.view).color, onclick: () => select(i, true)}));
   /* подпись точки при наведении: своя короткая (1–3 слова) или первые слова заголовка */
   const tip = h("span", {class: "pl-tip", "aria-hidden": "true"});
@@ -4043,7 +4110,7 @@ function viewPlot(){
   const hideTip = () => tip.classList.remove("show");
   dots.forEach((d, i) => { d.addEventListener("pointerenter", e => { if (e.pointerType !== "touch") showTip(i); }); d.addEventListener("pointerleave", hideTip); d.addEventListener("focus", () => showTip(i)); d.addEventListener("blur", hideTip); d.addEventListener("click", hideTip); });
   const hnd = h("div", {class: "pl-hnd", role: "slider", tabindex: "0", "aria-label": "Год", "aria-valuemin": String(rMin), "aria-valuemax": String(rMax)});
-  track.append(bands, ...labs, ...dots, hnd, tip);
+  track.append(bands, ...labs, ...grips, ...dots, hnd, tip);
   const big = h("b"), eraEl = h("span", {class: "pl-era"});
   const cnt = h("span", {class: "pl-n"});
   const mkBtn = (txt, pri, fn) => h("button", {class: "pl-btn" + (pri ? " pri" : ""), type: "button", onclick: fn}, txt);
@@ -4053,17 +4120,7 @@ function viewPlot(){
   const drawEra = k => {
     eraShown = k;
     eraBox.replaceChildren(...[
-      editing ? ed("div", {class: "pl-eraname"}, () => E[k].name, v => E[k].name = v, {ph: "Название эпохи", max: 60, after: () => render()}) : null,
-      (E[k].intro || editing) ? ed("div", {class: "pl-intro"}, () => E[k].intro, v => E[k].intro = v, {multi: true, ph: "Коротко об этой эпохе"}) : null,
-      editing ? eraTools(k) : null].filter(Boolean));
-  };
-  const eraTools = k => {
-    const e = E[k], numIn = (val, fn) => { const i = h("input", {type: "number", min: "0", max: "999", step: "1", value: String(val)}); i.onchange = () => { const v = parseInt(i.value, 10); if (isFinite(v)) change(() => fn(v)); else i.value = String(val); }; return i; };
-    return h("div", {class: "pl-edit"},
-      h("label", {}, "Начало, лет назад", numIn(e.from, v => { v = Math.max(e.to + 1, Math.min(k > 0 ? E[k - 1].from - 1 : 999, v)); e.from = v; if (k > 0) E[k - 1].to = v; })),
-      k === E.length - 1 ? h("label", {}, "Конец, лет назад", numIn(e.to, v => { e.to = Math.max(0, Math.min(e.from - 1, v)); })) : null,
-      e.from - e.to >= 2 ? toolBtn("plus", "Добавить эпоху после этой", () => change(() => { const mid = Math.round((e.from + e.to) / 2); E.splice(k + 1, 0, {name: "Новая эпоха", intro: "", from: mid, to: e.to}); e.to = mid; })) : h("span", {class: "pl-n"}, "Эпоха слишком короткая, чтобы делить"),
-      E.length > 1 ? dangerBtn("Удалить эпоху", () => change(() => { if (k > 0) E[k - 1].to = e.to; E.splice(k, 1); })) : null);
+      (E[k].intro || editing) ? ed("div", {class: "pl-intro"}, () => E[k].intro, v => E[k].intro = v, {multi: true, ph: "Коротко об этой эпохе"}) : null].filter(Boolean));
   };
   const drawDoc = () => {
     const c = P[cur], F = [plForm(c.form).name], V = [plView(c.view).name, plView(c.view).color], k = plEraOf(E, c.ago), o = order(), p = o.indexOf(cur);
@@ -4098,8 +4155,8 @@ function viewPlot(){
     hnd.setAttribute("aria-valuenow", String(a)); hnd.setAttribute("aria-valuetext", plAgoText(a));
     big.textContent = plAgoText(a); eraEl.textContent = E[k].name;
     dots.forEach((d, i) => d.classList.toggle("on", i === cur));
-    cnt.textContent = (p + 1) + " / " + o.length;
-    prevs.forEach(b => b.disabled = p === 0); nexts.forEach(b => b.disabled = p === o.length - 1);
+    cnt.textContent = o.length ? (p + 1) + " / " + o.length : "Документов пока нет.";
+    prevs.forEach(b => b.disabled = p <= 0); nexts.forEach(b => b.disabled = p === o.length - 1);
     if (k !== eraShown) drawEra(k);
   };
   function select(i, snap){
@@ -4112,8 +4169,35 @@ function viewPlot(){
   function step(d){ const o = order(), p = Math.max(0, Math.min(o.length - 1, o.indexOf(cur) + d)); select(o[p], true); }
   const upd = a => { plAgo = Math.max(rMin, Math.min(rMax, a)); const n = nearest(plAgo); if (n !== cur) select(n, false); else paint(); };
   const fromX = x => { const r = track.getBoundingClientRect(); return rMax - (x - r.left) / (r.width || 1) * span; };
+  grips.forEach((grip, i) => {
+    const before = E[i], after = E[i + 1];
+    let pointer, origin, year;
+    grip.addEventListener("pointerdown", e => {
+      if (e.button !== 0 || pointer !== undefined) return;
+      pointer = e.pointerId;
+      origin = fromX(e.clientX);
+      year = after.from;
+      grip.setPointerCapture(pointer);
+      grip.classList.add("drag");
+    });
+    grip.addEventListener("pointermove", e => {
+      if (e.pointerId !== pointer) return;
+      const next = after.from + Math.round(fromX(e.clientX) - origin);
+      year = Math.max(after.to + 1, Math.min(before.from - 1, next));
+      paintBands(i + 1, year);
+    });
+    const finish = (e, commit) => {
+      if (e.pointerId !== pointer) return;
+      pointer = undefined;
+      grip.classList.remove("drag");
+      if (commit && year !== after.from) change(() => { before.to = after.from = year; });
+      else paintBands();
+    };
+    grip.addEventListener("pointerup", e => finish(e, true));
+    grip.addEventListener("lostpointercapture", e => finish(e, false));
+  });
   let drag = false;
-  track.addEventListener("pointerdown", e => { if (e.target.closest(".pl-tk")) return; drag = true; track.classList.add("drag"); try{ track.setPointerCapture(e.pointerId); }catch(_){} upd(fromX(e.clientX)); });
+  track.addEventListener("pointerdown", e => { if (e.target.closest(".pl-tk,.pl-boundary")) return; drag = true; track.classList.add("drag"); try{ track.setPointerCapture(e.pointerId); }catch(_){} upd(fromX(e.clientX)); });
   track.addEventListener("pointermove", e => { if (drag) upd(fromX(e.clientX)); });
   const stop = () => { drag = false; track.classList.remove("drag"); };
   track.addEventListener("pointerup", stop); track.addEventListener("pointercancel", stop);
@@ -4140,13 +4224,15 @@ function viewPlot(){
   const onResize = () => { if (!track.isConnected){ removeEventListener("resize", onResize); return; } layout(); };
   addEventListener("resize", onResize);
   requestAnimationFrame(layout);
-  paint(); drawDoc();
+  paint(); if (P.length) drawDoc();
   return h("div", {class: "plot"}, top,
     h("div", {class: "pl-scrub"},
-      h("div", {class: "pl-read"}, big, eraEl), track,
+      h("div", {class: "pl-read"}, big, eraEl),
+      grips.length ? h("p", {class: "pl-n"}, "Потяните вертикальную границу, чтобы изменить длину эпохи.") : null,
+      track,
       h("div", {class: "pl-axis"}, h("span", {}, plAgoText(rMax)), h("span", {}, span >= 20 ? String(Math.round((rMax + rMin) / 2)) : ""), h("span", {}, plAgoText(rMin))),
       h("div", {class: "pl-ctl"}, prevs[0], cnt, nexts[0])),
-    eraBox, screen,
+    erasEditor, eraBox, screen,
     h("div", {class: "pl-legend"}, C.plotViews.map(v => h("span", {}, h("i", {style: "background:" + v.color}), v.name))),
     editing ? plViewsEditor() : null,
     addDoc);
