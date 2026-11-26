@@ -765,6 +765,7 @@ body.lbx-open{overflow:hidden}
 .wc:hover{background:var(--raise)}
 .wc-cover{position:relative;display:grid;place-items:center;aspect-ratio:16/9;padding:0;border:0;overflow:hidden;background:var(--c);color:var(--ci);font:300 64px/1 var(--display);cursor:pointer}
 .wc-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--c)}
+.wc-cover-size{position:absolute;top:8px;right:8px;z-index:1;padding:4px 7px;border-radius:4px;background:#171716;color:#fff;font:600 11px/1.3 var(--sans,system-ui);white-space:nowrap}
 .wc-body{display:flex;flex-direction:column;gap:12px;flex:1;padding:20px 22px 22px}
 .wc h3{margin:0;font-size:24px;line-height:1.15}.wc p{margin:0;color:var(--muted);white-space:pre-line}
 .wc-go{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:auto;padding:0 0 4px;border:0;border-bottom:1px solid var(--yel);background:none;color:var(--ink);font:500 12px/1.2 var(--body);text-transform:uppercase;letter-spacing:.12em;cursor:pointer}
@@ -4192,7 +4193,8 @@ function viewWorld(){
       return h("article", {class: "wc"},
         h("button", {class: "wc-cover", type: "button", "aria-label": "Открыть: " + (c.title || ""), onclick: () => openWorld(i)},
           h("span", {"aria-hidden": "true"}, pad(i + 1)),
-          src ? h("img", {src, alt: "", loading: "lazy", onerror: e => e.target.remove()}) : null),
+          src ? h("img", {src, alt: "", loading: "lazy", onerror: e => e.target.remove()}) : null,
+          editing ? h("span", {class: "wc-cover-size", "aria-hidden": "true"}, "1600 × 900 px · 16:9") : null),
         h("div", {class: "wc-body"},
           ed("h3", {}, () => c.title, v => c.title = v, {ph: "Название"}),
           ed("p", {}, () => c.text, v => c.text = v, {multi: true, ph: "Короткое описание"}),
